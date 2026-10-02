@@ -3,6 +3,7 @@
  * place of a free-text vehicle type string, so vehicle types are validated
  * by the type system instead of by string matching.
  */
+package interfaces;
 public enum VehicleType {
     SEDAN,
     LUXURY_SEDAN,

@@ -1,6 +1,7 @@
 /**
 	* Represents a private ride involving exactly one rider.
 */
+package interfaces;
 public interface IPrivateRide extends IRide {
 
 // Returns the rider assigned to this private ride.

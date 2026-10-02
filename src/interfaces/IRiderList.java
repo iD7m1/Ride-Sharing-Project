@@ -1,6 +1,8 @@
 /**
  * Stores all riders in a structure maintained in sorted order by rider ID.
  */
+package interfaces;
+import datastructures.LinkedList;
 public interface IRiderList {
 
     // Inserts a rider into the list in sorted order by ID. If a rider with the same ID already exists, insertion fails.

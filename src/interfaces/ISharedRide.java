@@ -1,6 +1,9 @@
 /**
 	* Represents a shared ride (carpool) involving multiple riders.
 */
+package interfaces;
+import datastructures.LinkedList;
+
 public interface ISharedRide extends IRide {
 
 // Returns the list of shared ride participants.

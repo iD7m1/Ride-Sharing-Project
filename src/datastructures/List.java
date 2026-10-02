@@ -1,3 +1,5 @@
+package datastructures;
+
 public interface List<T> {
     public void findFirst();
 

@@ -2,6 +2,7 @@
  * Represents a single rider in the ride-sharing system.
  * Riders are compared by ID.
  */
+package interfaces;
 public interface IRider extends IPerson, Comparable<IRider> {
 
     //return the rider's email address.

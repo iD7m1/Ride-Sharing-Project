@@ -2,6 +2,8 @@
  * Common fields and behavior shared by every person in the ride-sharing
  * system (riders and drivers). IRider and IDriver both extend this interface.
  */
+package interfaces;
+import datastructures.LinkedList;
 public interface IPerson {
 
     //return the unique ID of this person.

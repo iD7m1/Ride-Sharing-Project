@@ -2,6 +2,7 @@
  * Minimal date/time abstraction used by private rides and shared rides.
  * Implementations must define chronological ordering via compareTo.
  */
+package interfaces;
 public interface IDateTime extends Comparable<IDateTime> {
 
     //return year (e.g., 2026). 

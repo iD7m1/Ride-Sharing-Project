@@ -2,6 +2,7 @@
  * Represents a single driver in the ride-sharing system.
  * Drivers are compared by ID.
  */
+package interfaces;
 public interface IDriver extends IPerson, Comparable<IDriver> {
 
     /**

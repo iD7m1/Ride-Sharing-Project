@@ -2,6 +2,8 @@
 /**
  * The interface of the Ride-Sharing System.
  */
+package interfaces;
+import datastructures.LinkedList;
 public interface IRideSharingSystem {
 	// Loads riders from a CSV file.
 	// Returns true if loading succeeds; false otherwise.

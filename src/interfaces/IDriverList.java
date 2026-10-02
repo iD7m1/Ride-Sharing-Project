@@ -1,6 +1,8 @@
 /**
  * Stores all drivers in a structure maintained in sorted order by driver ID.
  */
+package interfaces;
+import datastructures.LinkedList;
 public interface IDriverList {
 
     // Inserts a driver into the list in sorted order by ID. If a driver with the same ID already exists, insertion fails.

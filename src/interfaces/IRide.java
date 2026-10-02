@@ -1,6 +1,7 @@
 /**
 	* Represents a generic ride in the ride-sharing system. Set the pickup and drop-off Date/Time values only in the constructor.
 */
+package interfaces;
 public interface IRide extends Comparable<IRide> {
 
 	// Returns the unique internal ride ID.

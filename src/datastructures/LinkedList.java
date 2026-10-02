@@ -1,3 +1,5 @@
+package datastructures;
+
 public class LinkedList<T> implements List<T> {
     private Node<T> head;
     private Node<T> current;
