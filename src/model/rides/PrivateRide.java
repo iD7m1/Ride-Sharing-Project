@@ -15,7 +15,7 @@ public class PrivateRide extends Ride implements IPrivateRide {
     // Checks whether a rider participates in this ride.
     @Override
     public boolean hasRider(int riderId) {
-        return false;
+        return rider.getId() == riderId;
     }
 
     @Override
@@ -30,6 +30,6 @@ public class PrivateRide extends Ride implements IPrivateRide {
 
     @Override
     public String toString() {
-        return null;
+        return String.format("%s, Rider: %s (ID %d)", super.toString(), rider.getName(), rider.getId());
     }
 }
