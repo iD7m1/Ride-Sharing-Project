@@ -1,4 +1,5 @@
 package model.persons;
+
 import interfaces.IRider;
 
 public class Rider extends Person implements IRider {
@@ -33,12 +34,23 @@ public class Rider extends Person implements IRider {
 
     @Override
     public String toString() {
-        return "";
+        return super.toString() + ", Email: " + email + ", Home City: " + homeCity;
     }
 
-    // Compares this rider with another rider based on rider ID.
+    /**
+     * Compares this rider with another rider based on rider ID.
+     * Returns a negative integer, zero, or a positive integer as this
+     * rider's ID is less than, equal to, or greater than the other
+     * rider's ID. This ordering must be consistent with equality by ID.
+     */
     @Override
     public int compareTo(IRider other) {
-        return 0;
+        if (this.getId() < other.getId()) {
+            return -1;
+        } else if (this.getId() > other.getId()) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 }
