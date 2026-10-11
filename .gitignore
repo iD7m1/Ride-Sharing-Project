@@ -1,3 +1,5 @@
 *.pdf
 *.md
 settings.json
+*.csv
+.gitignore

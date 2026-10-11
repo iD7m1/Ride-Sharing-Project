@@ -1,4 +1,5 @@
 package model.persons;
+
 import datastructures.LinkedList;
 import interfaces.IPerson;
 import interfaces.IRide;
@@ -9,7 +10,7 @@ public abstract class Person implements IPerson {
     private String phoneNumber;
     private LinkedList<IRide> rideHistory;
 
-    public Person(int id, String name, String phoneNumber) {
+    public Person(int id, String name, String phoneNumber) throws IllegalArgumentException {
         this.id = id;
         setName(name);
         setPhoneNumber(phoneNumber);
@@ -21,9 +22,17 @@ public abstract class Person implements IPerson {
         this.name = name;
     }
 
-    // The phone number must be exactly 10 digits (numeric characters only)
+    /**
+     * Sets the phone number of this person.
+     * The phone number must be exactly 10 digits (numeric characters only,
+     * e.g., "0551234567"). Implementations must validate the format and
+     * throw IllegalArgumentException if it does not match.
+     */
     @Override
-    public void setPhoneNumber(String phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) throws IllegalArgumentException {
+        if (phoneNumber == null || !phoneNumber.matches("05\\d{8}")) {
+            throw new IllegalArgumentException("Phone number must be exactly 10 digits.");
+        }
         this.phoneNumber = phoneNumber;
     }
 
@@ -49,6 +58,6 @@ public abstract class Person implements IPerson {
 
     @Override
     public String toString() {
-        return null;
+        return "ID: " + id + ", Name: " + name + ", Phone Number: " + phoneNumber;
     }
 }
