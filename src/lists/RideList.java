@@ -22,7 +22,7 @@ public class RideList implements IRideList {
     }
 
     @Override
-    public boolean addRide(IRide ride) {
+    public boolean addRide(IRide ride)  {
         // Check the uniqueness
         if (ride == null || hasRide(ride.getRideId())) return false;
 
