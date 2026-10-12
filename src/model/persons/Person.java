@@ -30,7 +30,7 @@ public abstract class Person implements IPerson {
      */
     @Override
     public void setPhoneNumber(String phoneNumber) throws IllegalArgumentException {
-        if (phoneNumber == null || !phoneNumber.matches("05\\d{8}")) {
+        if (phoneNumber == null || !phoneNumber.matches("\\d{10}")) {
             throw new IllegalArgumentException("Phone number must be exactly 10 digits.");
         }
         this.phoneNumber = phoneNumber;

@@ -14,8 +14,8 @@ public class RiderList implements IRiderList {
     @Override
     public boolean add(IRider rider) {
         // Check the uniqueness
-        if (rider == null || findById(rider.getId()) != null)
-            return false; // Rider with the same ID already exists
+        if (rider == null || (findById(rider.getId()) != null && findByEmail(rider.getEmail()) != null))
+            return false; // Rider is null or already exists
 
         // Insert the rider in sorted order by ID
 
@@ -182,9 +182,9 @@ public class RiderList implements IRiderList {
             if (riders.retrieve().getName().equalsIgnoreCase(fullName)) {
                 riders.remove();
                 count++;
+            } else {
+                riders.findNext();
             }
-
-            riders.findNext();
         }
 
         // Check last element
@@ -207,9 +207,9 @@ public class RiderList implements IRiderList {
             if (riders.retrieve().getHomeCity().equalsIgnoreCase(homeCity)) {
                 riders.remove();
                 count++;
+            } else {
+                riders.findNext();
             }
-
-            riders.findNext();
         }
 
         // Check last element
