@@ -3,31 +3,50 @@ package model.persons;
 import interfaces.IDriver;
 import interfaces.VehicleType;
 
+/**
+ * Represents a driver in the ride-sharing system.
+ *
+ * <p>Inherits common personal information and ride history
+ * from Person. Each driver also has a unique vehicle plate number
+ * and a vehicle type. Drivers are compared by their IDs in ascending order. </p>
+ *
+ * ID & VehiclePlate uniqueness is enforced by DriverList and
+ * RideSharingSystem when Driver are added.
+ */
 public class Driver extends Person implements IDriver {
+
     private String vehiclePlate;
     private VehicleType vehicleType;
 
-    public Driver(int id, String name, String phoneNumber, String vehiclePlate, VehicleType vehicleType)
-            throws IllegalArgumentException {
+    /**
+     * Constructs a driver with the specified information.
+     *
+     * @param id           the driver's unique identifier
+     * @param name         the driver's name
+     * @param phoneNumber  the driver's 10-digit phone number
+     * @param vehiclePlate the vehicle unique plate number
+     * @param vehicleType  the driver's vehicle type
+     * @throws IllegalArgumentException if the phone number or vehicle plate format is invalid
+     */
+    public Driver (int id, String name, String phoneNumber, String vehiclePlate, VehicleType vehicleType) throws IllegalArgumentException {
         super(id, name, phoneNumber);
         setVehiclePlate(vehiclePlate);
         setVehicleType(vehicleType);
     }
 
     /**
-     * Sets the driver's vehicle plate number.
-     * The plate must follow the format of exactly 3 uppercase letters
-     * followed by 4 digits (e.g., "ABC1234"). Implementations must
-     * validate the format and throw IllegalArgumentException if it does
-     * not match. Vehicle plate numbers must be unique across all drivers
-     * in the system; enforcing that uniqueness is the responsibility of
-     * IDriverList/IRideSharingSystem when a driver is added.
+     * Updates the driver's vehicle plate number.
+     * <p> The plate must contain exactly three uppercase letters
+     * followed by four digits (e.g., ABC1234). </p>
+     *
+     * @param vehiclePlate the new vehicle plate number
+     * @throws IllegalArgumentException if the plate is null
+     *                                  or does not match the required format
      */
     @Override
-    public void setVehiclePlate(String vehiclePlate) throws IllegalArgumentException {
+    public void setVehiclePlate (String vehiclePlate) throws IllegalArgumentException {
         if (vehiclePlate == null || !vehiclePlate.matches("[A-Z]{3}\\d{4}")) {
-            throw new IllegalArgumentException(
-                    "Vehicle plate must be exactly 3 uppercase letters followed by 4 digits.");
+            throw new IllegalArgumentException("Vehicle plate must be exactly 3 uppercase letters followed by 4 digits.");
         }
         this.vehiclePlate = vehiclePlate;
     }
@@ -53,19 +72,15 @@ public class Driver extends Person implements IDriver {
     }
 
     /**
-     * Compares this driver with another driver based on driver ID.
-     * Returns a negative integer, zero, or a positive integer as this
-     * driver's ID is less than, equal to, or greater than the other
-     * driver's ID. This ordering must be consistent with equality by ID.
+     * Compares this driver with another driver by ID.
+     *
+     * @param other the driver to compare against
+     * @return a negative value if this driver's ID is smaller,
+     *         zero if both IDs are equal, or a positive value
+     *         if this driver's ID is greater
      */
     @Override
     public int compareTo(IDriver other) {
-        if (this.getId() < other.getId()) {
-            return -1;
-        } else if (this.getId() > other.getId()) {
-            return 1;
-        } else {
-            return 0;
-        }
+        return Integer.compare(this.getId(), other.getId());
     }
 }

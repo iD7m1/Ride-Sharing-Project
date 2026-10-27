@@ -4,6 +4,20 @@ import datastructures.LinkedList;
 import interfaces.IRider;
 import interfaces.IRiderList;
 
+/**
+ * Manages the collection of riders in the ride-sharing system.
+ * <p>
+ * Riders are stored in a custom linked list sorted by ID
+ * in ascending order. Each rider must have a unique ID
+ * and email address.
+ *
+ * Email addresses and other textual search attributes
+ * are compared case-insensitively.
+ * <p>
+ * Provides operations for adding, searching, removing,
+ * and retrieving riders.
+ */
+
 public class RiderList implements IRiderList {
     private LinkedList<IRider> riders;
 
@@ -11,8 +25,17 @@ public class RiderList implements IRiderList {
         riders = new LinkedList<IRider>();
     }
 
+    /**
+     * Adds a rider while maintaining ascending ID order.
+     *
+     * Rejects null riders, duplicate IDs, and duplicate
+     * email addresses. Email uniqueness is case-insensitive.
+     *
+     * @param rider the rider to add
+     * @return true if the rider was added successfully; false if null or a uniqueness constraint is violated
+     */
     @Override
-    public boolean add(IRider rider) {
+    public boolean add (IRider rider) {
         // Check the uniqueness
         if (rider == null || (findById(rider.getId()) != null && findByEmail(rider.getEmail()) != null))
             return false; // Rider is null or already exists
@@ -49,10 +72,15 @@ public class RiderList implements IRiderList {
         return true;
     }
 
+    /**
+     * Searches for a rider by ID.
+     *
+     * @param riderId the rider ID to search for
+     * @return the matching rider, or null if not found
+     */
     @Override
     public IRider findById(int riderId) {
-        if (riders.empty())
-            return null;
+        if (riders.empty()) return null;
 
         riders.findFirst();
         while (!riders.last()) {
@@ -63,6 +91,14 @@ public class RiderList implements IRiderList {
         return riders.retrieve().getId() == riderId ? riders.retrieve() : null;
     }
 
+    /**
+     * Finds all riders with the specified full name.
+     *
+     * Name comparisons are case-insensitive.
+     *
+     * @param fullName the full name to search for
+     * @return a list of matching riders, or an empty list if no matches are found
+     */
     @Override
     public LinkedList<IRider> findByName(String fullName) {
         LinkedList<IRider> result = new LinkedList<IRider>();
@@ -85,6 +121,14 @@ public class RiderList implements IRiderList {
         return result;
     }
 
+    /**
+     * Searches for a rider by email address.
+     *
+     * Email comparisons are case-insensitive.
+     *
+     * @param email the email address to search for
+     * @return the matching rider, or null if not found
+     */
     @Override
     public IRider findByEmail(String email) {
         if (riders.empty())
@@ -99,6 +143,14 @@ public class RiderList implements IRiderList {
         return riders.retrieve().getEmail().equalsIgnoreCase(email) ? riders.retrieve() : null;
     }
 
+    /**
+     * Finds all riders living in the specified home city.
+     *
+     * City comparisons are case-insensitive.
+     *
+     * @param homeCity the home city to search for
+     * @return a list of matching riders, or an empty list if no matches are found
+     */
     @Override
     public LinkedList<IRider> findByHomeCity(String homeCity) {
         LinkedList<IRider> result = new LinkedList<IRider>();
@@ -126,6 +178,12 @@ public class RiderList implements IRiderList {
         return riders;
     }
 
+    /**
+     * Removes a rider by ID.
+     *
+     * @param riderId the ID of the rider to remove
+     * @return true if the rider was removed; false if no matching rider exists
+     */
     @Override
     public boolean removeById(int riderId) {
         if (riders.empty())
@@ -148,6 +206,14 @@ public class RiderList implements IRiderList {
         return false;
     }
 
+    /**
+     * Removes a rider by email address.
+     *
+     * Email comparisons are case-insensitive.
+     *
+     * @param email the email address of the rider to remove
+     * @return true if the rider was removed; false if no matching rider exists
+     */
     @Override
     public boolean removeByEmail(String email) {
         if (riders.empty())
@@ -170,6 +236,16 @@ public class RiderList implements IRiderList {
         return false;
     }
 
+    /**
+     * Removes all riders with the specified full name.
+     *
+     * Name comparisons are case-insensitive.
+     * The traversal accounts for the automatic cursor
+     * movement performed by LinkedList.remove().
+     *
+     * @param fullName the full name of riders to remove
+     * @return the number of riders removed
+     */
     @Override
     public int removeByName(String fullName) {
         if (riders.empty())
@@ -195,6 +271,16 @@ public class RiderList implements IRiderList {
         return count;
     }
 
+    /**
+     * Removes all riders living in the specified home city.
+     *
+     * City comparisons are case-insensitive.
+     * The traversal accounts for the automatic cursor
+     * movement performed by LinkedList.remove().
+     *
+     * @param homeCity the home city of riders to remove
+     * @return the number of riders removed
+     */
     @Override
     public int removeByHomeCity(String homeCity) {
         if (riders.empty())
@@ -220,6 +306,11 @@ public class RiderList implements IRiderList {
         return count;
     }
 
+    /**
+     * Returns the number of riders currently stored.
+     *
+     * @return the total number of riders
+     */
     @Override
     public int size() {
         return riders.size();

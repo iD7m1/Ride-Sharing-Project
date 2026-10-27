@@ -1,16 +1,16 @@
 package datastructures;
 
-public class LinkedList<T> implements List<T> {
+public class LinkedList <T> implements List <T> {
     private Node<T> head;
     private Node<T> current;
     private int size;
 
-    public LinkedList() {
+    public LinkedList () {
         head = current = null;
         size = 0;
     }
 
-    public boolean empty() {
+    public boolean empty () {
         return head == null;
     }
 
@@ -22,7 +22,7 @@ public class LinkedList<T> implements List<T> {
         return current.previous == null;
     }
 
-    public boolean full() {
+    public boolean full () {
         return false;
     }
 
@@ -34,19 +34,19 @@ public class LinkedList<T> implements List<T> {
         current = current.previous;
     }
 
-    public void findNext() {
+    public void findNext () {
         current = current.next;
     }
 
-    public T retrieve() {
+    public T retrieve () {
         return current.data;
     }
 
-    public void update(T val) {
+    public void update (T val) {
         current.data = val;
     }
 
-    public void insert(T val) {
+    public void insert (T val) {
         Node<T> tmp = new Node<T>(val);
         if(empty()) {
             current = head = tmp;
@@ -62,7 +62,6 @@ public class LinkedList<T> implements List<T> {
         size++;
     }
 
-    // Add an element and maintains alphabetical ordering requires this method
     public void insertFirst (T val) {
         Node<T> element = new Node<>(val);
 
@@ -77,7 +76,7 @@ public class LinkedList<T> implements List<T> {
             size++;
     }
 
-    public void remove() {
+    public void remove () {
         if(current == head) {
             head = head.next;
             if(head != null) head.previous = null;

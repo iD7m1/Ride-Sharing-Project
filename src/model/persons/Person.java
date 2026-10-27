@@ -1,16 +1,39 @@
 package model.persons;
-
 import datastructures.LinkedList;
 import interfaces.IPerson;
 import interfaces.IRide;
 
+/**
+ * Represents the common attributes and behavior of a person
+ * in the ride-sharing system.
+ *
+ * <p>This abstract class serves as the base class for Rider
+ * and Driver. Each person has a unique identifier, a name,
+ * a phone number, and a history of associated rides.</p>
+ *
+ * <p>The identifier cannot be changed after construction.
+ * Phone numbers must contain exactly 10 numeric digits.</p>
+ *
+ * ID uniqueness is enforced by DriverList, RiderList and
+ * RideSharingSystem when records are added.
+ */
+
 public abstract class Person implements IPerson {
+
     private final int id;
     private String name;
     private String phoneNumber;
     private LinkedList<IRide> rideHistory;
 
-    public Person(int id, String name, String phoneNumber) throws IllegalArgumentException {
+    /**
+     * a person with the specified information.
+     *
+     * @param id          the person's identifier
+     * @param name        the person's name
+     * @param phoneNumber the person's 10-digit phone number
+     * @throws IllegalArgumentException if the phone number is invalid
+     */
+    public Person (int id, String name, String phoneNumber) throws IllegalArgumentException {
         this.id = id;
         setName(name);
         setPhoneNumber(phoneNumber);
@@ -23,15 +46,19 @@ public abstract class Person implements IPerson {
     }
 
     /**
-     * Sets the phone number of this person.
-     * The phone number must be exactly 10 digits (numeric characters only,
-     * e.g., "0551234567"). Implementations must validate the format and
-     * throw IllegalArgumentException if it does not match.
+     * Updates the person's phone number.
+     *
+     * <p>The number must contain exactly 10 digits (0-9).
+     * No spaces, letters, or other characters are permitted.</p>
+     *
+     * @param phoneNumber the new phone number
+     * @throws IllegalArgumentException if the value is null or does not contain exactly 10 digits
+     *
      */
     @Override
-    public void setPhoneNumber(String phoneNumber) throws IllegalArgumentException {
+    public void setPhoneNumber (String phoneNumber) throws IllegalArgumentException {
         if (phoneNumber == null || !phoneNumber.matches("\\d{10}")) {
-            throw new IllegalArgumentException("Phone number must be exactly 10 digits.");
+            throw new IllegalArgumentException("Phone number must contain exactly 10 digits.");
         }
         this.phoneNumber = phoneNumber;
     }

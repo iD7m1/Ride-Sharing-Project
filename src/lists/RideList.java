@@ -2,6 +2,17 @@ package lists;
 import datastructures.LinkedList;
 import interfaces.*;
 
+/**
+ * Manages the collection of rides in the ride-sharing system.
+ * <p>
+ * Rides are stored in a linked list and maintained
+ * in ascending alphabetical order by pickup location.
+ * Each ride must have a unique ride ID.
+ * <p>
+ * Provides operations for adding, removing, and searching
+ * rides by pickup location or participating rider name.
+ */
+
 public class RideList implements IRideList {
     private LinkedList<IRide> rides;
 
@@ -9,71 +20,91 @@ public class RideList implements IRideList {
         rides = new LinkedList<>();
     }
 
-    // Check if a ride exists
+    /**
+     * Checks whether a ride with the specified ID exists.
+     *
+     * @param id the ride ID to search for
+     * @return true if the ride exists; false otherwise
+     */
     private boolean hasRide (int id) {
         if (rides.empty()) return false;
 
         rides.findFirst();
-        while (!rides.last()) {
+        while (true) {
             if (rides.retrieve().getRideId() == id) return true;
+            if (rides.last()) break;
             rides.findNext();
         }
-        return rides.retrieve().getRideId() == id;
+
+        return false;
     }
 
+    /**
+     * Adds a ride while preserving alphabetical order
+     * by pickup location.
+     * <p>
+     * Rejects null rides and duplicate ride IDs.
+     *
+     * @param ride the ride to add
+     * @return true if the ride was added successfully; false if it is null or its ID already exists
+     */
     @Override
     public boolean addRide(IRide ride)  {
-        // Check the uniqueness
         if (ride == null || hasRide(ride.getRideId())) return false;
 
-        // First ride
+        // Insert directly when the list is empty.
         if (rides.empty()) {
             rides.insert(ride);
             return true;
         }
 
         rides.findFirst();
-        // New ride come before first ride
+
+        // Insert before the first ride.
         if (rides.retrieve().compareTo(ride) > 0) {
             rides.insertFirst(ride);
             return true;
         }
 
-        // Find the first ride that comes after the new ride
+        // Find the first ride that should follow the new ride.
         while (!rides.last()) {
             rides.findNext();
 
             if (rides.retrieve().compareTo(ride) > 0) {
-                // Go back one element since the "insert" method insert after the current
+                // insert() inserts after current, so move back first.
                 rides.findPrevious();
                 rides.insert(ride);
                 return true;
             }
         }
 
-        // New ride comes after all existing rides
+        // Append when the new ride belongs at the end.
         rides.insert(ride);
         return true;
     }
 
+    /**
+     * Removes a ride with the specified ID.
+     *
+     * @param rideId the ID of the ride to remove
+     * @return true if the ride was removed; false if not found
+     */
     @Override
     public boolean removeRideById(int rideId) {
         if (rides.empty()) return false;
 
         rides.findFirst();
 
-        while (!rides.last()) {
+        while (true) {
             if (rides.retrieve().getRideId() == rideId) {
                 rides.remove();
                 return true;
             }
+
+            if (rides.last()) break;
             rides.findNext();
         }
-        // Check last element
-        if (rides.retrieve().getRideId() == rideId) {
-            rides.remove();
-            return true;
-        }
+
         return false;
     }
 
@@ -82,6 +113,16 @@ public class RideList implements IRideList {
         return rides;
     }
 
+    /**
+     * Finds all rides with the specified pickup location.
+     * <p>
+     * The comparison is case-insensitive. Matching rides
+     * are returned in their existing alphabetical order.
+     *
+     * @param pickupLocation the pickup location to search for
+     * @return a list of matching rides, or an empty list
+     *         if no matches are found
+     */
     @Override
     public LinkedList<IRide> findByPickupLocation(String pickupLocation) {
         LinkedList<IRide> result = new LinkedList<>();
@@ -89,20 +130,29 @@ public class RideList implements IRideList {
 
         rides.findFirst();
 
-        while (!rides.last()) {
-            if (rides.retrieve().getPickupLocation().equalsIgnoreCase(pickupLocation)) {
-                result.insert(rides.retrieve());
-            }
+        while (true) {
+            if (rides.retrieve().getPickupLocation().equalsIgnoreCase(pickupLocation)) result.insert(rides.retrieve());
+            if (rides.last()) break;
             rides.findNext();
         }
 
-        // Check last element
-        if (rides.retrieve().getPickupLocation().equalsIgnoreCase(pickupLocation)) {
-            result.insert(rides.retrieve());
-        }
         return result;
     }
 
+    /**
+     * Finds all rides containing a rider with the specified name.
+     * <p>
+     * For private rides, checks the assigned rider.
+     * For shared rides, searches the participant list.
+     * <p>
+     * Name comparisons are case-insensitive. Each matching
+     * ride is included only once, even if multiple participants
+     * in the same shared ride have the requested name.
+     *
+     * @param riderFullName the full name of the rider
+     * @return a list of matching rides, or an empty list
+     *         if no matches are found
+     */
     @Override
     public LinkedList<IRide> findByRiderName(String riderFullName) {
         LinkedList<IRide> result = new LinkedList<>();
