@@ -126,7 +126,7 @@ public abstract class Ride implements IRide {
 
     @Override
     public String toString() {
-        return String.format("Ride ID: %d, Driver: %d - %s Pickup: %s, Pickup Time: %s, Drop-off: %s, Drop-off Time: %s",
+        return String.format("Ride ID: %d, Driver: %d - %s, Pickup: %s, Pickup Time: %s, Drop-off: %s, Drop-off Time: %s",
                 rideId, driver.getId(), driver.getName(), pickupLocation, pickupTime.format(), dropoffLocation, dropoffTime.format());
     }
 }

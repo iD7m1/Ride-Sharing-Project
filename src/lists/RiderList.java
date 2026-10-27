@@ -37,7 +37,7 @@ public class RiderList implements IRiderList {
     @Override
     public boolean add (IRider rider) {
         // Check the uniqueness
-        if (rider == null || (findById(rider.getId()) != null && findByEmail(rider.getEmail()) != null))
+        if (rider == null || findById(rider.getId()) != null || findByEmail(rider.getEmail()) != null)
             return false; // Rider is null or already exists
 
         // Insert the rider in sorted order by ID

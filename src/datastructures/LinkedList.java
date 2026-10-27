@@ -77,6 +77,10 @@ public class LinkedList <T> implements List <T> {
     }
 
     public void remove () {
+        if (empty() || current == null) {
+        return;
+        }
+    
         if(current == head) {
             head = head.next;
             if(head != null) head.previous = null;
