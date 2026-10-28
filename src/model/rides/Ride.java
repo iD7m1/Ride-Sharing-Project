@@ -67,7 +67,7 @@ public abstract class Ride implements IRide {
 
     /**
      * Compares this ride with another ride alphabetically
-     * by pickup location.
+     * by pickup location, ignoring letter case.
      *
      * @param other the ride to compare against
      * @return a negative value if this pickup location comes
@@ -76,7 +76,8 @@ public abstract class Ride implements IRide {
      */
     @Override
     public int compareTo(IRide other) {
-        return this.pickupLocation.compareTo(other.getPickupLocation());
+        // Ignore case so "airport" and "Airport" sort together
+        return this.pickupLocation.compareToIgnoreCase(other.getPickupLocation());
     }
 
     @Override

@@ -51,8 +51,15 @@ public class Driver extends Person implements IDriver {
         this.vehiclePlate = vehiclePlate;
     }
 
+    /**
+     * Updates the driver's vehicle type.
+     *
+     * @param vehicleType the new vehicle type
+     * @throws IllegalArgumentException if the vehicle type is null
+     */
     @Override
-    public void setVehicleType(VehicleType vehicleType) {
+    public void setVehicleType(VehicleType vehicleType) throws IllegalArgumentException {
+        if (vehicleType == null) throw new IllegalArgumentException("Vehicle type can't be null");
         this.vehicleType = vehicleType;
     }
 

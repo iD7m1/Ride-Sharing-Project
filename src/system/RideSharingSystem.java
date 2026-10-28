@@ -12,7 +12,21 @@ import lists.RiderList;
 import model.DateTime;
 import model.persons.Driver;
 import model.persons.Rider;
+import model.rides.PrivateRide;
+import model.rides.SharedRide;
 
+/**
+ * The ride-sharing system application.
+ * <p>
+ * Coordinates RiderList, DriverList, and RideList and enforces the
+ * system rules: unique rider IDs, driver IDs, and vehicle plates,
+ * existence checks and conflict-free scheduling of rides, and cascade
+ * removal of rides when a rider or a driver is removed.
+ * </p>
+ * Every scheduled ride is also stored in the ride history of its
+ * driver and of each of its riders, so conflict checks and cascade
+ * removals only visit the rides of the people involved.
+ */
 public class RideSharingSystem implements IRideSharingSystem {
 
     private IRiderList riderList;
@@ -137,86 +151,359 @@ public class RideSharingSystem implements IRideSharingSystem {
 
     @Override
     public IRider searchRiderById(int riderId) {
-        return null;
+        return riderList.findById(riderId);
     }
 
     @Override
     public IRider searchRiderByEmail(String email) {
-        return null;
+        return riderList.findByEmail(email);
     }
 
     @Override
     public LinkedList<IRider> searchRidersByName(String fullName) {
-        return null;
+        return riderList.findByName(fullName);
     }
 
     @Override
     public LinkedList<IRider> searchRidersByHomeCity(String homeCity) {
-        return null;
+        return riderList.findByHomeCity(homeCity);
     }
 
     @Override
     public LinkedList<IRider> getAllRiders() {
-        return null;
+        return riderList.getAll();
     }
 
     @Override
     public IDriver searchDriverById(int driverId) {
-        return null;
+        return driverList.findById(driverId);
     }
 
     @Override
     public IDriver searchDriverByVehiclePlate(String vehiclePlate) {
-        return null;
+        return driverList.findByVehiclePlate(vehiclePlate);
     }
 
     @Override
     public LinkedList<IDriver> searchDriversByVehicleType(VehicleType vehicleType) {
-        return null;
+        return driverList.findByVehicleType(vehicleType);
     }
 
     @Override
     public LinkedList<IDriver> getAllDrivers() {
-        return null;
+        return driverList.getAll();
     }
 
+    /**
+     * Removes a rider and cascades the removal to their rides.
+     * <p>
+     * Every private ride of the rider is deleted. The rider is removed
+     * from every shared ride they are registered on, and a shared ride
+     * left with no participants is deleted.
+     * </p>
+     * The rider's ride history holds exactly the rides they are on,
+     * so only those rides are visited.
+     *
+     * @param riderId the ID of the rider to remove
+     * @return true if the rider was found and removed; false otherwise
+     */
     @Override
     public boolean removeRider(int riderId) {
-        return false;
+        IRider rider = riderList.findById(riderId);
+        if (rider == null) return false;
+
+        LinkedList<IRide> history = rider.getRideHistory();
+
+        // Take the first ride out of the history until the history is empty
+        while (!history.empty()) {
+            history.findFirst();
+            IRide ride = history.retrieve();
+            history.remove();
+
+            if (ride instanceof IPrivateRide) {
+                deleteRide(ride);
+            } else if (ride instanceof ISharedRide) {
+                ISharedRide sharedRide = (ISharedRide) ride;
+                sharedRide.removeParticipantById(riderId);
+
+                // A shared ride with no riders left is deleted
+                if (sharedRide.isEmpty())
+                    deleteRide(ride);
+            }
+        }
+
+        riderList.removeById(riderId);
+        return true;
     }
 
+    /**
+     * Removes a driver and deletes every ride (private or shared)
+     * assigned to them.
+     * <p>
+     * The driver's ride history holds exactly the rides assigned
+     * to them, so only those rides are visited.
+     *
+     * @param driverId the ID of the driver to remove
+     * @return true if the driver was found and removed; false otherwise
+     */
     @Override
     public boolean removeDriver(int driverId) {
-        return false;
+        IDriver driver = driverList.findById(driverId);
+        if (driver == null) return false;
+
+        LinkedList<IRide> history = driver.getRideHistory();
+
+        // Take the first ride out of the history until the history is empty
+        while (!history.empty()) {
+            history.findFirst();
+            IRide ride = history.retrieve();
+            history.remove();
+            deleteRide(ride);
+        }
+
+        driverList.removeById(driverId);
+        return true;
     }
 
+    /**
+     * Schedules a private ride for one rider with one driver.
+     * <p>
+     * Fails if the locations or times are missing, the drop-off is not
+     * after the pickup, the rider or the driver does not exist, or the
+     * ride overlaps a ride already in the rider's or the driver's schedule.
+     *
+     * @return true if the ride was scheduled; false otherwise
+     */
     @Override
     public boolean schedulePrivateRide(String pickupLocation, IDateTime pickupTime, IDateTime dropoffTime, String dropoffLocation, int riderId, int driverId) {
-        return false;
+        if (!isValidRideInfo(pickupLocation, pickupTime, dropoffTime, dropoffLocation)) return false;
+
+        // The rider and the driver must exist
+        IRider rider = riderList.findById(riderId);
+        IDriver driver = driverList.findById(driverId);
+        if (rider == null || driver == null) return false;
+
+        // The ride must not conflict with the rider's or the driver's schedule
+        if (hasConflict(rider.getRideHistory(), pickupTime, dropoffTime)) return false;
+        if (hasConflict(driver.getRideHistory(), pickupTime, dropoffTime)) return false;
+
+        IPrivateRide ride = new PrivateRide(nextRideId++, pickupTime, dropoffTime, pickupLocation, dropoffLocation, driver, rider);
+        rideList.addRide(ride);
+        rider.getRideHistory().insert(ride);
+        driver.getRideHistory().insert(ride);
+        return true;
     }
 
+    /**
+     * Schedules a shared ride for one or more riders with one driver.
+     * <p>
+     * Fails if the locations or times are missing, the drop-off is not
+     * after the pickup, no rider IDs are given, a rider ID is listed twice,
+     * the driver or any rider does not exist, or the ride overlaps a ride
+     * already in the driver's or any listed rider's schedule.
+     * </p>
+     * Every check is done before anything is changed, so a failed call
+     * leaves the system exactly as it was.
+     *
+     * @return true if the ride was scheduled; false otherwise
+     */
     @Override
     public boolean scheduleSharedRide(String pickupLocation, IDateTime pickupTime, IDateTime dropoffTime, String dropoffLocation, int[] riderIds, int driverId) {
-        return false;
+        if (!isValidRideInfo(pickupLocation, pickupTime, dropoffTime, dropoffLocation)) return false;
+        if (riderIds == null || riderIds.length == 0) return false;
+
+        // The driver must exist and be free at this time
+        IDriver driver = driverList.findById(driverId);
+        if (driver == null) return false;
+        if (hasConflict(driver.getRideHistory(), pickupTime, dropoffTime)) return false;
+
+        // Every rider must be listed once, exist, and be free at this time
+        IRider[] riders = new IRider[riderIds.length];
+        for (int i = 0; i < riderIds.length; i++) {
+            for (int j = 0; j < i; j++) {
+                if (riderIds[j] == riderIds[i]) return false; // Same rider listed twice
+            }
+
+            riders[i] = riderList.findById(riderIds[i]);
+            if (riders[i] == null) return false;
+            if (hasConflict(riders[i].getRideHistory(), pickupTime, dropoffTime)) return false;
+        }
+
+        // All checks passed: create the ride and link it to everyone on it
+        ISharedRide ride = new SharedRide(nextRideId++, pickupTime, dropoffTime, pickupLocation, dropoffLocation, driver);
+        for (int i = 0; i < riders.length; i++) {
+            ride.addParticipant(riders[i]);
+            riders[i].getRideHistory().insert(ride);
+        }
+        rideList.addRide(ride);
+        driver.getRideHistory().insert(ride);
+        return true;
     }
 
     @Override
     public LinkedList<IRide> searchRidesByPickupLocation(String pickupLocation) {
-        return null;
+        return rideList.findByPickupLocation(pickupLocation);
     }
 
     @Override
     public LinkedList<IRide> searchRidesByRiderName(String riderName) {
-        return null;
+        return rideList.findByRiderName(riderName);
     }
 
+    /**
+     * Returns the riders registered on the shared ride at the given
+     * pickup location.
+     * <p>
+     * If more than one shared ride starts at that location, the riders
+     * of all of them are returned, each rider only once. Private rides
+     * at that location are ignored.
+     *
+     * @param pickupLocation the pickup location of the shared ride
+     * @return a list of the participants, or an empty list if there is
+     *         no shared ride at that location
+     */
     @Override
     public LinkedList<IRider> getSharedRideParticipants(String pickupLocation) {
-        return null;
+        LinkedList<IRider> result = new LinkedList<IRider>();
+        LinkedList<IRide> matches = rideList.findByPickupLocation(pickupLocation);
+        if (matches.empty()) return result;
+
+        matches.findFirst();
+        while (true) {
+            if (matches.retrieve() instanceof ISharedRide) {
+                LinkedList<IRider> participants = ((ISharedRide) matches.retrieve()).getParticipants();
+
+                if (!participants.empty()) {
+                    participants.findFirst();
+                    while (true) {
+                        // containsRider leaves the cursor on the last element when
+                        // the rider is not found, so insert() appends at the end
+                        if (!containsRider(result, participants.retrieve().getId()))
+                            result.insert(participants.retrieve());
+                        if (participants.last()) break;
+                        participants.findNext();
+                    }
+                }
+            }
+            if (matches.last()) break;
+            matches.findNext();
+        }
+        return result;
     }
 
     @Override
     public LinkedList<IRide> getAllRidesAlphabetically() {
-        return null;
+        // RideList keeps the rides sorted by pickup location, so no sorting is needed
+        return rideList.getAllAlphabetically();
+    }
+
+    /**
+     * Checks the common information every new ride needs: both locations
+     * present, both times present, and the drop-off after the pickup.
+     *
+     * @return true if the information is valid; false otherwise
+     */
+    private boolean isValidRideInfo(String pickupLocation, IDateTime pickupTime, IDateTime dropoffTime, String dropoffLocation) {
+        if (pickupLocation == null || pickupLocation.trim().isEmpty()) return false;
+        if (dropoffLocation == null || dropoffLocation.trim().isEmpty()) return false;
+        if (pickupTime == null || dropoffTime == null) return false;
+
+        // The drop-off must come after the pickup
+        if (pickupTime.compareTo(dropoffTime) >= 0) return false;
+        return true;
+    }
+
+    /**
+     * Checks whether a time range overlaps any ride in a ride history.
+     * <p>
+     * Two ranges [pickup1, dropoff1) and [pickup2, dropoff2) overlap
+     * exactly when pickup1 < dropoff2 and pickup2 < dropoff1, where
+     * "<" is evaluated with compareTo. A ride that starts exactly when
+     * another one ends is therefore not a conflict.
+     *
+     * @param history     the rides already scheduled for a person
+     * @param pickupTime  the pickup time of the new ride
+     * @param dropoffTime the drop-off time of the new ride
+     * @return true if the new ride overlaps a ride in the history; false otherwise
+     */
+    private boolean hasConflict(LinkedList<IRide> history, IDateTime pickupTime, IDateTime dropoffTime) {
+        if (history.empty()) return false;
+
+        history.findFirst();
+        while (true) {
+            IRide ride = history.retrieve();
+            if (pickupTime.compareTo(ride.getDropoffTime()) < 0 && ride.getPickupTime().compareTo(dropoffTime) < 0)
+                return true;
+            if (history.last()) break;
+            history.findNext();
+        }
+        return false;
+    }
+
+    /**
+     * Deletes a ride from the system: removes it from the ride list,
+     * from its driver's ride history, and from the ride history of
+     * every rider on it.
+     *
+     * @param ride the ride to delete
+     */
+    private void deleteRide(IRide ride) {
+        int rideId = ride.getRideId();
+        rideList.removeRideById(rideId);
+        removeFromHistory(ride.getDriver().getRideHistory(), rideId);
+
+        if (ride instanceof IPrivateRide) {
+            removeFromHistory(((IPrivateRide) ride).getRider().getRideHistory(), rideId);
+        } else if (ride instanceof ISharedRide) {
+            LinkedList<IRider> participants = ((ISharedRide) ride).getParticipants();
+            if (participants.empty()) return;
+
+            participants.findFirst();
+            while (true) {
+                removeFromHistory(participants.retrieve().getRideHistory(), rideId);
+                if (participants.last()) break;
+                participants.findNext();
+            }
+        }
+    }
+
+    /**
+     * Removes the ride with the given ID from a ride history, if present.
+     *
+     * @param history the ride history to update
+     * @param rideId  the ID of the ride to remove
+     */
+    private void removeFromHistory(LinkedList<IRide> history, int rideId) {
+        if (history.empty()) return;
+
+        history.findFirst();
+        while (true) {
+            if (history.retrieve().getRideId() == rideId) {
+                history.remove();
+                return;
+            }
+            if (history.last()) break;
+            history.findNext();
+        }
+    }
+
+    /**
+     * Checks whether a list of riders contains a rider with the given ID.
+     * When the rider is not found, the cursor is left on the last element.
+     *
+     * @param riders  the list to search
+     * @param riderId the rider ID to search for
+     * @return true if the rider is in the list; false otherwise
+     */
+    private boolean containsRider(LinkedList<IRider> riders, int riderId) {
+        if (riders.empty()) return false;
+
+        riders.findFirst();
+        while (true) {
+            if (riders.retrieve().getId() == riderId) return true;
+            if (riders.last()) break;
+            riders.findNext();
+        }
+        return false;
     }
 }

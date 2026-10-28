@@ -18,7 +18,9 @@ public class DriverList implements IDriverList {
 
     private LinkedList<IDriver> drivers;
 
-    public DriverList() {}
+    public DriverList() {
+        drivers = new LinkedList<IDriver>();
+    }
 
     /**
      * Adds a driver while maintaining ascending ID order.
@@ -31,7 +33,40 @@ public class DriverList implements IDriverList {
      */
     @Override
     public boolean add(IDriver driver) {
-        return false;
+        // Check the uniqueness
+        if (driver == null || findById(driver.getId()) != null || findByVehiclePlate(driver.getVehiclePlate()) != null)
+            return false; // Driver is null or already exists
+
+        // Insert the driver in sorted order by ID
+
+        // First driver
+        if (drivers.empty()) {
+            drivers.insert(driver);
+            return true;
+        }
+
+        drivers.findFirst();
+        // New driver comes before the first driver
+        if (drivers.retrieve().compareTo(driver) > 0) {
+            drivers.insertFirst(driver);
+            return true;
+        }
+
+        // Find the first driver that comes after the new driver
+        while (!drivers.last()) {
+            drivers.findNext();
+
+            if (drivers.retrieve().compareTo(driver) > 0) {
+                // Go back one element since the "insert" method inserts after the current
+                drivers.findPrevious();
+                drivers.insert(driver);
+                return true;
+            }
+        }
+
+        // New driver comes after all existing drivers
+        drivers.insert(driver);
+        return true;
     }
 
     /**
@@ -42,7 +77,19 @@ public class DriverList implements IDriverList {
      */
     @Override
     public IDriver findById(int driverId) {
-        return null;
+        if (drivers.empty()) return null;
+
+        drivers.findFirst();
+        while (!drivers.last()) {
+            if (drivers.retrieve().getId() == driverId)
+                return drivers.retrieve();
+            drivers.findNext();
+        }
+        // Check last element
+        if (drivers.retrieve().getId() == driverId)
+            return drivers.retrieve();
+        else
+            return null;
     }
 
     /**
@@ -55,7 +102,24 @@ public class DriverList implements IDriverList {
      */
     @Override
     public LinkedList<IDriver> findByName(String fullName) {
-        return null;
+        LinkedList<IDriver> result = new LinkedList<IDriver>();
+        if (drivers.empty())
+            return result;
+
+        drivers.findFirst();
+
+        while (!drivers.last()) {
+            if (drivers.retrieve().getName().equalsIgnoreCase(fullName)) {
+                result.insert(drivers.retrieve());
+            }
+            drivers.findNext();
+        }
+
+        // Check last element
+        if (drivers.retrieve().getName().equalsIgnoreCase(fullName)) {
+            result.insert(drivers.retrieve());
+        }
+        return result;
     }
 
     /**
@@ -69,7 +133,20 @@ public class DriverList implements IDriverList {
      */
     @Override
     public IDriver findByVehiclePlate(String vehiclePlate) {
-        return null;
+        if (drivers.empty())
+            return null;
+
+        drivers.findFirst();
+        while (!drivers.last()) {
+            if (drivers.retrieve().getVehiclePlate().equals(vehiclePlate))
+                return drivers.retrieve();
+            drivers.findNext();
+        }
+        // Check last element
+        if (drivers.retrieve().getVehiclePlate().equals(vehiclePlate))
+            return drivers.retrieve();
+        else
+            return null;
     }
 
     /**
@@ -80,12 +157,30 @@ public class DriverList implements IDriverList {
      */
     @Override
     public LinkedList<IDriver> findByVehicleType(VehicleType vehicleType) {
-        return null;
+        LinkedList<IDriver> result = new LinkedList<IDriver>();
+        if (drivers.empty())
+            return result;
+
+        drivers.findFirst();
+
+        while (!drivers.last()) {
+            // Enum values are unique objects, so == is enough
+            if (drivers.retrieve().getVehicleType() == vehicleType) {
+                result.insert(drivers.retrieve());
+            }
+            drivers.findNext();
+        }
+
+        // Check last element
+        if (drivers.retrieve().getVehicleType() == vehicleType) {
+            result.insert(drivers.retrieve());
+        }
+        return result;
     }
 
     @Override
     public LinkedList<IDriver> getAll() {
-        return null;
+        return drivers;
     }
 
     /**
@@ -96,6 +191,23 @@ public class DriverList implements IDriverList {
      */
     @Override
     public boolean removeById(int driverId) {
+        if (drivers.empty())
+            return false;
+
+        drivers.findFirst();
+
+        while (!drivers.last()) {
+            if (drivers.retrieve().getId() == driverId) {
+                drivers.remove();
+                return true;
+            }
+            drivers.findNext();
+        }
+        // Check last element
+        if (drivers.retrieve().getId() == driverId) {
+            drivers.remove();
+            return true;
+        }
         return false;
     }
 
@@ -110,6 +222,23 @@ public class DriverList implements IDriverList {
      */
     @Override
     public boolean removeByVehiclePlate(String vehiclePlate) {
+        if (drivers.empty())
+            return false;
+
+        drivers.findFirst();
+
+        while (!drivers.last()) {
+            if (drivers.retrieve().getVehiclePlate().equals(vehiclePlate)) {
+                drivers.remove();
+                return true;
+            }
+            drivers.findNext();
+        }
+        // Check last element
+        if (drivers.retrieve().getVehiclePlate().equals(vehiclePlate)) {
+            drivers.remove();
+            return true;
+        }
         return false;
     }
 
@@ -125,7 +254,28 @@ public class DriverList implements IDriverList {
      */
     @Override
     public int removeByName(String fullName) {
-        return 0;
+        if (drivers.empty())
+            return 0;
+
+        int count = 0;
+        drivers.findFirst();
+
+        while (!drivers.last()) {
+            if (drivers.retrieve().getName().equalsIgnoreCase(fullName)) {
+                // remove() already moves the cursor to the next element
+                drivers.remove();
+                count++;
+            } else {
+                drivers.findNext();
+            }
+        }
+
+        // Check last element
+        if (drivers.retrieve().getName().equalsIgnoreCase(fullName)) {
+            drivers.remove();
+            count++;
+        }
+        return count;
     }
 
     /**
@@ -139,7 +289,28 @@ public class DriverList implements IDriverList {
      */
     @Override
     public int removeByVehicleType(VehicleType vehicleType) {
-        return 0;
+        if (drivers.empty())
+            return 0;
+
+        int count = 0;
+        drivers.findFirst();
+
+        while (!drivers.last()) {
+            if (drivers.retrieve().getVehicleType() == vehicleType) {
+                // remove() already moves the cursor to the next element
+                drivers.remove();
+                count++;
+            } else {
+                drivers.findNext();
+            }
+        }
+
+        // Check last element
+        if (drivers.retrieve().getVehicleType() == vehicleType) {
+            drivers.remove();
+            count++;
+        }
+        return count;
     }
 
     /**
@@ -149,6 +320,6 @@ public class DriverList implements IDriverList {
      */
     @Override
     public int size() {
-        return 0;
+        return drivers.size();
     }
 }
