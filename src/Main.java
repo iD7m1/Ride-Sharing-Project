@@ -25,7 +25,11 @@ public class Main {
     private static final BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
     private static final IRideSharingSystem system = new RideSharingSystem();
 
-    private static void printMenu() {
+    public static void main (String[] args) {
+
+    }
+
+    private static void printMenu () {
         System.out.println("========== Ride-Sharing System ==========");
         System.out.println("1. List all riders");
         System.out.println("2. Search for riders by home city");
@@ -50,7 +54,7 @@ public class Main {
      * @param list         the list to print
      * @param emptyMessage the message to print when the list is empty
      */
-    private static <T> void printList(LinkedList<T> list, String emptyMessage) {
+    private static <T> void printList (LinkedList<T> list, String emptyMessage) {
         if (list == null || list.empty()) {
             System.out.println(emptyMessage);
             return;
@@ -62,13 +66,13 @@ public class Main {
             if (list.last()) break;
             list.findNext();
         }
-        System.out.println("(" + list.size() + " result(s))");
+        System.out.printf("(%d result(s))\n", list.size());
     }
 
     /**
      * Option 4: reads a rider's information, creates the rider, and adds it.
      */
-    private static void addRider() {
+    private static void addRider () {
         int id = readInt("Enter rider ID: ");
         String name = readLine("Enter full name: ");
         String email = readLine("Enter email: ");
@@ -88,7 +92,7 @@ public class Main {
     /**
      * Option 7: reads a driver's information, creates the driver, and adds it.
      */
-    private static void addDriver() {
+    private static void addDriver () {
         int id = readInt("Enter driver ID: ");
         String name = readLine("Enter full name: ");
         String phone = readLine("Enter phone number (10 digits): ");
@@ -111,7 +115,7 @@ public class Main {
      * @param prompt the message to show before reading
      * @return the line the user entered
      */
-    private static String readLine(String prompt) {
+    private static String readLine (String prompt) {
         System.out.print(prompt);
         try {
             String line = input.readLine();
@@ -134,7 +138,7 @@ public class Main {
      * @param prompt the message to show before reading
      * @return the number the user entered
      */
-    private static int readInt(String prompt) {
+    private static int readInt (String prompt) {
         while (true) {
             String text = readLine(prompt);
             try {
@@ -151,7 +155,7 @@ public class Main {
      *
      * @return the vehicle type the user entered
      */
-    private static VehicleType readVehicleType() {
+    private static VehicleType readVehicleType () {
         while (true) {
             String text = readLine("Enter vehicle type (SEDAN, LUXURY_SEDAN, SUV, VAN): ");
             try {
@@ -169,7 +173,7 @@ public class Main {
      * @param prompt the message to show before reading
      * @return the date/time the user entered
      */
-    private static IDateTime readDateTime(String prompt) {
+    private static IDateTime readDateTime (String prompt) {
         while (true) {
             String text = readLine(prompt);
             try {
