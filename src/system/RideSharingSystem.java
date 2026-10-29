@@ -3,7 +3,6 @@ package system;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-
 import datastructures.LinkedList;
 import interfaces.*;
 import lists.DriverList;
@@ -34,6 +33,12 @@ public class RideSharingSystem implements IRideSharingSystem {
     private IRideList rideList;
     private int nextRideId;
 
+    /**
+     * Constructs an empty ride-sharing system.
+     *
+     * Initializes the rider, driver, and ride collections
+     * and sets the initial ride ID to 1.
+     */
     public RideSharingSystem() {
         this.riderList = new RiderList();
         this.driverList = new DriverList();
@@ -41,7 +46,17 @@ public class RideSharingSystem implements IRideSharingSystem {
         this.nextRideId = 1;
     }
 
-    private IDateTime parseDateTime(String dateTimeStr) {
+    /**
+     * Converts a formatted date-time string into an IDateTime object.
+     *
+     * The expected format is MM/DD/YYYY HH:MM.
+     *
+     * @param dateTimeStr the date-time string to parse
+     * @return an IDateTime object representing the specified date and time
+     * @throws IllegalArgumentException if the date-time format or value is invalid
+     */
+
+    private IDateTime parseDateTime (String dateTimeStr) {
         String[] parts = dateTimeStr.trim().split(" ");
         String[] dateParts = parts[0].split("/");
         String[] timeParts = parts[1].split(":");
@@ -55,6 +70,22 @@ public class RideSharingSystem implements IRideSharingSystem {
         return new DateTime(year, month, day, hour, minute);
     }
 
+    /**
+     * Loads rider records from a CSV file.
+     *
+     * Each nonempty line is expected to contain the rider ID,
+     * name, email, phone number, and home city.
+     *
+     * Creates a Rider object for each record and attempts
+     * to add it to the system.
+     *
+     * Empty lines are skipped. Invalid file operations or
+     * invalid argument values cause the method to return false.
+     *
+     * @param ridersFilePath the path to the riders CSV file
+     * @return true if the file is processed without a caught exception;
+     *         false otherwise
+     */
     @Override
     public boolean loadRidersFromCSV(String ridersFilePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(ridersFilePath))) {
@@ -79,6 +110,23 @@ public class RideSharingSystem implements IRideSharingSystem {
         }
     }
 
+    /**
+     * Loads driver records from a CSV file.
+     *
+     * Each nonempty line is expected to contain the driver ID,
+     * name, phone number, vehicle plate, and vehicle type.
+     *
+     * Converts the vehicle type into its corresponding enum
+     * constant, creates a Driver object, and attempts to add
+     * it to the system.
+     *
+     * Empty lines are skipped. Invalid file operations or
+     * invalid argument values cause the method to return false.
+     *
+     * @param driversFilePath the path to the drivers CSV file
+     * @return true if the file is processed without a caught exception;
+     *         false otherwise
+     */
     @Override
     public boolean loadDriversFromCSV(String driversFilePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(driversFilePath))) {
@@ -103,6 +151,25 @@ public class RideSharingSystem implements IRideSharingSystem {
         }
     }
 
+    /**
+     * Loads ride records from a CSV file.
+     *
+     * Each nonempty line specifies the ride type, pickup location,
+     * pickup time, drop-off time, drop-off location, driver ID,
+     * and rider ID or IDs.
+     *
+     * Private rides contain one rider ID, while shared rides
+     * contain multiple rider IDs separated by semicolons.
+     *
+     * Uses the corresponding scheduling method to attempt
+     * to register each ride.
+     *
+     * Empty lines are skipped. Invalid file operations or
+     * invalid argument values cause the method to return false.
+     *
+     * @param ridesFilePath the path to the rides CSV file
+     * @return true if the file is processed without a caught exception; false otherwise
+     */
     @Override
     public boolean loadRidesFromCSV(String ridesFilePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(ridesFilePath))) {
@@ -137,58 +204,130 @@ public class RideSharingSystem implements IRideSharingSystem {
         }
     }
 
+    /**
+     * Adds a rider to the system.
+     *
+     * Rejects null riders and delegates insertion and
+     * uniqueness validation to the rider list.
+     *
+     * @param rider the rider to add
+     * @return true if the rider is added successfully;
+     *         false if the rider is null or rejected
+     */
     @Override
     public boolean addRider(IRider rider) {
         if (rider == null) return false;
         return riderList.add(rider);
     }
 
+    /**
+     * Adds a driver to the system.
+     *
+     * Rejects null drivers and delegates insertion and
+     * uniqueness validation to the driver list.
+     *
+     * @param driver the driver to add
+     * @return true if the driver is added successfully;
+     *         false if the driver is null or rejected
+     */
     @Override
     public boolean addDriver(IDriver driver) {
         if (driver == null) return false;
         return driverList.add(driver);
     }
 
+    /**
+     * Searches for a rider by their unique ID.
+     *
+     * @param riderId the ID of the rider to find
+     * @return the matching rider, or null if not found
+     */
     @Override
     public IRider searchRiderById(int riderId) {
         return riderList.findById(riderId);
     }
 
+    /**
+     * Searches for a rider by email address.
+     *
+     * @param email the email address to search for
+     * @return the matching rider, or null if not found
+     */
     @Override
     public IRider searchRiderByEmail(String email) {
         return riderList.findByEmail(email);
     }
 
+    /**
+     * Searches for all riders with the specified full name.
+     *
+     * @param fullName the full name to search for
+     * @return a linked list containing all matching riders
+     */
     @Override
     public LinkedList<IRider> searchRidersByName(String fullName) {
         return riderList.findByName(fullName);
     }
 
+    /**
+     * Searches for all riders from the specified home city.
+     *
+     * @param homeCity the home city to search for
+     * @return a linked list containing all matching riders
+     */
     @Override
     public LinkedList<IRider> searchRidersByHomeCity(String homeCity) {
         return riderList.findByHomeCity(homeCity);
     }
 
+    /**
+     * Retrieves all riders registered in the system.
+     *
+     * @return a linked list containing all registered riders
+     */
     @Override
     public LinkedList<IRider> getAllRiders() {
         return riderList.getAll();
     }
 
+    /**
+     * Searches for a driver by their unique ID.
+     *
+     * @param driverId the ID of the driver to find
+     * @return the matching driver, or null if not found
+     */
     @Override
     public IDriver searchDriverById(int driverId) {
         return driverList.findById(driverId);
     }
 
+    /**
+     * Searches for a driver by vehicle plate number.
+     *
+     * @param vehiclePlate the vehicle plate to search for
+     * @return the matching driver, or null if not found
+     */
     @Override
     public IDriver searchDriverByVehiclePlate(String vehiclePlate) {
         return driverList.findByVehiclePlate(vehiclePlate);
     }
 
+    /**
+     * Searches for all drivers with the specified vehicle type.
+     *
+     * @param vehicleType the vehicle type to search for
+     * @return a linked list containing all matching drivers
+     */
     @Override
     public LinkedList<IDriver> searchDriversByVehicleType(VehicleType vehicleType) {
         return driverList.findByVehicleType(vehicleType);
     }
 
+    /**
+     * Retrieves all drivers registered in the system.
+     *
+     * @return a linked list containing all registered drivers
+     */
     @Override
     public LinkedList<IDriver> getAllDrivers() {
         return driverList.getAll();
@@ -208,7 +347,7 @@ public class RideSharingSystem implements IRideSharingSystem {
      * @return true if the rider was found and removed; false otherwise
      */
     @Override
-    public boolean removeRider(int riderId) {
+    public boolean removeRider (int riderId) {
         IRider rider = riderList.findById(riderId);
         if (rider == null) return false;
 
@@ -247,7 +386,7 @@ public class RideSharingSystem implements IRideSharingSystem {
      * @return true if the driver was found and removed; false otherwise
      */
     @Override
-    public boolean removeDriver(int driverId) {
+    public boolean removeDriver (int driverId) {
         IDriver driver = driverList.findById(driverId);
         if (driver == null) return false;
 
@@ -258,7 +397,7 @@ public class RideSharingSystem implements IRideSharingSystem {
             history.findFirst();
             IRide ride = history.retrieve();
             history.remove();
-            deleteRide(ride);
+            deleteRide (ride);
         }
 
         driverList.removeById(driverId);
@@ -266,16 +405,22 @@ public class RideSharingSystem implements IRideSharingSystem {
     }
 
     /**
-     * Schedules a private ride for one rider with one driver.
-     * <p>
-     * Fails if the locations or times are missing, the drop-off is not
-     * after the pickup, the rider or the driver does not exist, or the
-     * ride overlaps a ride already in the rider's or the driver's schedule.
+     * Schedules a private ride for one rider and one driver.
      *
-     * @return true if the ride was scheduled; false otherwise
+     * The rider and driver must already exist, and the ride
+     * must not conflict with either person's existing schedule.
+     *
+     * @param pickupLocation the pickup location
+     * @param pickupTime the pickup date and time
+     * @param dropoffTime the drop-off date and time
+     * @param dropoffLocation the drop-off location
+     * @param riderId the ID of the rider
+     * @param driverId the ID of the assigned driver
+     * @return true if the ride is scheduled successfully;
+     *         false otherwise
      */
     @Override
-    public boolean schedulePrivateRide(String pickupLocation, IDateTime pickupTime, IDateTime dropoffTime, String dropoffLocation, int riderId, int driverId) {
+    public boolean schedulePrivateRide (String pickupLocation, IDateTime pickupTime, IDateTime dropoffTime, String dropoffLocation, int riderId, int driverId) {
         if (!isValidRideInfo(pickupLocation, pickupTime, dropoffTime, dropoffLocation)) return false;
 
         // The rider and the driver must exist
@@ -295,17 +440,21 @@ public class RideSharingSystem implements IRideSharingSystem {
     }
 
     /**
-     * Schedules a shared ride for one or more riders with one driver.
-     * <p>
-     * Fails if the locations or times are missing, the drop-off is not
-     * after the pickup, no rider IDs are given, a rider ID is listed twice,
-     * the driver or any rider does not exist, or the ride overlaps a ride
-     * already in the driver's or any listed rider's schedule.
-     * </p>
-     * Every check is done before anything is changed, so a failed call
-     * leaves the system exactly as it was.
+     * Schedules a shared ride involving multiple riders
+     * and one driver.
      *
-     * @return true if the ride was scheduled; false otherwise
+     * All riders and the driver must already exist.
+     * The ride must not conflict with the existing schedule
+     * of any participating rider or the assigned driver.
+     *
+     * @param pickupLocation the pickup location
+     * @param pickupTime the pickup date and time
+     * @param dropoffTime the drop-off date and time
+     * @param dropoffLocation the drop-off location
+     * @param riderIds the IDs of the participating riders
+     * @param driverId the ID of the assigned driver
+     * @return true if the ride is scheduled successfully;
+     *         false otherwise
      */
     @Override
     public boolean scheduleSharedRide(String pickupLocation, IDateTime pickupTime, IDateTime dropoffTime, String dropoffLocation, int[] riderIds, int driverId) {
@@ -340,11 +489,26 @@ public class RideSharingSystem implements IRideSharingSystem {
         return true;
     }
 
+    /**
+     * Searches for all rides with the specified pickup location.
+     *
+     * Multiple rides may have the same pickup location.
+     *
+     * @param pickupLocation the pickup location to search for
+     * @return a linked list containing all matching rides
+     */
     @Override
     public LinkedList<IRide> searchRidesByPickupLocation(String pickupLocation) {
         return rideList.findByPickupLocation(pickupLocation);
     }
 
+    /**
+     * Searches for all rides involving a rider
+     * with the specified name.
+     *
+     * @param riderName the rider name to search for
+     * @return a linked list containing all matching rides
+     */
     @Override
     public LinkedList<IRide> searchRidesByRiderName(String riderName) {
         return rideList.findByRiderName(riderName);
@@ -409,8 +573,7 @@ public class RideSharingSystem implements IRideSharingSystem {
         if (pickupTime == null || dropoffTime == null) return false;
 
         // The drop-off must come after the pickup
-        if (pickupTime.compareTo(dropoffTime) >= 0) return false;
-        return true;
+        return pickupTime.compareTo(dropoffTime) < 0;
     }
 
     /**
@@ -447,10 +610,10 @@ public class RideSharingSystem implements IRideSharingSystem {
      *
      * @param ride the ride to delete
      */
-    private void deleteRide(IRide ride) {
+    private void deleteRide (IRide ride) {
         int rideId = ride.getRideId();
         rideList.removeRideById(rideId);
-        removeFromHistory(ride.getDriver().getRideHistory(), rideId);
+        removeFromHistory (ride.getDriver().getRideHistory(), rideId);
 
         if (ride instanceof IPrivateRide) {
             removeFromHistory(((IPrivateRide) ride).getRider().getRideHistory(), rideId);
@@ -473,7 +636,7 @@ public class RideSharingSystem implements IRideSharingSystem {
      * @param history the ride history to update
      * @param rideId  the ID of the ride to remove
      */
-    private void removeFromHistory(LinkedList<IRide> history, int rideId) {
+    private void removeFromHistory (LinkedList<IRide> history, int rideId) {
         if (history.empty()) return;
 
         history.findFirst();

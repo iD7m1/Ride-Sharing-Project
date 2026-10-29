@@ -42,20 +42,20 @@ public class RiderList implements IRiderList {
 
         // Insert the rider in sorted order by ID
 
-        // First ride
+        // First rider
         if (riders.empty()) {
             riders.insert(rider);
             return true;
         }
 
         riders.findFirst();
-        // New ride come before first ride
+        // New rider come before first ride
         if (riders.retrieve().compareTo(rider) > 0) {
             riders.insertFirst(rider);
             return true;
         }
 
-        // Find the first ride that comes after the new ride
+        // Find the first rider that comes after the new ride
         while (!riders.last()) {
             riders.findNext();
 
@@ -67,7 +67,7 @@ public class RiderList implements IRiderList {
             }
         }
 
-        // New ride comes after all existing rides
+        // New rider comes after all existing rides
         riders.insert(rider);
         return true;
     }

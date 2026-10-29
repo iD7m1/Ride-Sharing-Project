@@ -12,7 +12,6 @@ import interfaces.*;
  * Provides operations for adding, removing, and searching
  * rides by pickup location or participating rider name.
  */
-
 public class RideList implements IRideList {
     private LinkedList<IRide> rides;
 

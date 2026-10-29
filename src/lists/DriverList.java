@@ -32,7 +32,7 @@ public class DriverList implements IDriverList {
      * @return true if the driver was added successfully; false if the driver is null or violates uniqueness
      */
     @Override
-    public boolean add(IDriver driver) {
+    public boolean add (IDriver driver) {
         // Check the uniqueness
         if (driver == null || findById(driver.getId()) != null || findByVehiclePlate(driver.getVehiclePlate()) != null)
             return false; // Driver is null or already exists
@@ -101,7 +101,7 @@ public class DriverList implements IDriverList {
      *         if no matches are found
      */
     @Override
-    public LinkedList<IDriver> findByName(String fullName) {
+    public LinkedList<IDriver> findByName (String fullName) {
         LinkedList<IDriver> result = new LinkedList<IDriver>();
         if (drivers.empty())
             return result;
@@ -253,7 +253,7 @@ public class DriverList implements IDriverList {
      * @return the number of drivers removed
      */
     @Override
-    public int removeByName(String fullName) {
+    public int removeByName (String fullName) {
         if (drivers.empty())
             return 0;
 
