@@ -124,6 +124,6 @@ public class SharedRide extends Ride implements ISharedRide {
             participants.findNext();
         }
 
-        return String.format("%s, %s", super.toString(), riders);
+        return String.format("Shared, %s, %s", super.toString(), riders);
     }
 }

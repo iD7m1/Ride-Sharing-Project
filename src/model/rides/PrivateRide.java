@@ -61,6 +61,6 @@ public class PrivateRide extends Ride implements IPrivateRide {
 
     @Override
     public String toString() {
-        return String.format("%s, Rider: %s (ID %d)", super.toString(), rider.getName(), rider.getId());
+        return String.format("Private, %s, Rider: %s (ID %d)", super.toString(), rider.getName(), rider.getId());
     }
 }

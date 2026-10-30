@@ -1,5 +1,7 @@
 package model;
 import interfaces.IDateTime;
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
 
 /**
  * Represents an immutable date and time in the ride-sharing system.
@@ -34,16 +36,11 @@ public class DateTime implements IDateTime {
      */
 
     public DateTime (int year, int month, int day, int hour, int minute) throws IllegalArgumentException {
-        if (year < 1)
-            throw new IllegalArgumentException("Year must be positive.");
-        if (month < 1 || month > 12)
-            throw new IllegalArgumentException("Month must be between 1 and 12.");
-        if (day < 1 || day > daysInMonth(year, month))
-            throw new IllegalArgumentException("Day is out of range for the given month.");
-        if (hour < 0 || hour > 23)
-            throw new IllegalArgumentException("Hour must be between 0 and 23.");
-        if (minute < 0 || minute > 59)
-            throw new IllegalArgumentException("Minute must be between 0 and 59.");
+        try {
+            LocalDateTime.of(year, month, day, hour, minute);
+        } catch (DateTimeException e) {
+            throw new IllegalArgumentException("Invalid date or time.", e);
+        }
 
         this.year = year;
         this.month = month;
@@ -53,35 +50,12 @@ public class DateTime implements IDateTime {
     }
 
     /**
-     * Returns the number of days in the given month,
-     * taking leap years into account for February.
-     *
-     * @param year  the year
-     * @param month the month (1-12)
-     * @return the number of days in that month
-     */
-    private static int daysInMonth (int year, int month) {
-        switch (month) {
-            case 2:
-                // Leap year: divisible by 4, except centuries not divisible by 400
-                if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)
-                    return 29;
-                else
-                    return 28;
-            case 4: case 6: case 9: case 11:
-                return 30;
-            default:
-                return 31;
-        }
-    }
-
-    /**
      * Formats the date and time as MM/DD/YYYY HH:MM.
      *
      * @return the formatted date-time string
      */
     @Override
-    public String format() {
+    public String format () {
         // %02d pads single digits with a leading zero (e.g., 3 -> 03)
         return String.format("%02d/%02d/%04d %02d:%02d", month, day, year, hour, minute);
     }

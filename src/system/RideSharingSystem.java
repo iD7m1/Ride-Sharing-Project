@@ -39,7 +39,7 @@ public class RideSharingSystem implements IRideSharingSystem {
      * Initializes the rider, driver, and ride collections
      * and sets the initial ride ID to 1.
      */
-    public RideSharingSystem() {
+    public RideSharingSystem () {
         this.riderList = new RiderList();
         this.driverList = new DriverList();
         this.rideList = new RideList();
@@ -243,7 +243,7 @@ public class RideSharingSystem implements IRideSharingSystem {
      * @return the matching rider, or null if not found
      */
     @Override
-    public IRider searchRiderById(int riderId) {
+    public IRider searchRiderById (int riderId) {
         return riderList.findById(riderId);
     }
 
@@ -457,9 +457,9 @@ public class RideSharingSystem implements IRideSharingSystem {
      *         false otherwise
      */
     @Override
-    public boolean scheduleSharedRide(String pickupLocation, IDateTime pickupTime, IDateTime dropoffTime, String dropoffLocation, int[] riderIds, int driverId) {
+    public boolean scheduleSharedRide (String pickupLocation, IDateTime pickupTime, IDateTime dropoffTime, String dropoffLocation, int[] riderIds, int driverId) {
         if (!isValidRideInfo(pickupLocation, pickupTime, dropoffTime, dropoffLocation)) return false;
-        if (riderIds == null || riderIds.length == 0) return false;
+        if (riderIds == null || riderIds.length < 2) return false;
 
         // The driver must exist and be free at this time
         IDriver driver = driverList.findById(driverId);
