@@ -27,9 +27,15 @@ public class Main {
 
     public static void main (String[] args) {
 
-            system.loadDriversFromCSV("csv\\drivers_30.csv");
-            system.loadRidersFromCSV("csv\\riders_100.csv");
-            system.loadRidesFromCSV("csv\\rides_40.csv");
+            if (!system.loadDriversFromCSV("csv/drivers_30.csv"))
+                if (!system.loadDriversFromCSV("../csv/drivers_30.csv"))
+                    system.loadDriversFromCSV("drivers_30.csv");
+            if (!system.loadRidersFromCSV("csv/riders_100.csv"))
+                if (!system.loadRidersFromCSV("../csv/riders_100.csv"))
+                    system.loadRidersFromCSV("riders_100.csv");
+            if (!system.loadRidesFromCSV("csv/rides_40.csv"))
+                if (!system.loadRidesFromCSV("../csv/rides_40.csv"))
+                    system.loadRidesFromCSV("rides_40.csv");
 
             while (true) {
                 printMenu();
