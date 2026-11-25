@@ -1,44 +1,32 @@
-/**
-	* Represents a generic ride in the ride-sharing system. Set the pickup and drop-off Date/Time values only in the constructor.
-*/
 package interfaces;
+/**
+ * A ride. Rides are immutable and compared by ride ID.
+ */
 public interface IRide extends Comparable<IRide> {
 
-	// Returns the unique internal ride ID.
+	// Returns the ride ID (assigned by the system).
 	int getRideId();
 
-	// Returns the pickup location of the ride.
+	// Returns the pickup location.
 	String getPickupLocation();
 
-	// Sets the pickup location of the ride.
-	void setPickupLocation(String pickupLocation);
-
-	// Returns the pickup date/time of the ride.
-	IDateTime getPickupTime();
-
-	// Returns the drop-off date/time of the ride.
-	IDateTime getDropoffTime();
-
-	// Returns the drop-off location of the ride.
+	// Returns the drop-off location.
 	String getDropoffLocation();
 
-	// Sets the drop-off location of the ride.
-	void setDropoffLocation(String dropoffLocation);
+	// Returns the time slot [pickup date/time, drop-off date/time).
+	ITimeSlot getTimeSlot();
 
-	// Returns the driver assigned to this ride.
+	// Returns the assigned driver.
 	IDriver getDriver();
 
-	// Sets the driver assigned to this ride.
-	void setDriver(IDriver driver);
-
-	// Checks whether a rider participates in this ride.
+	// Returns true if the rider participates in this ride.
 	boolean hasRider(int riderId);
 
-	// Returns a formatted string describing the ride.
+	// Returns a formatted string describing the ride, including its ride ID.
 	@Override
 	String toString();
 
-	// Compares rides alphabetically by pickup location.
+	// Compares rides by ride ID (negative, zero, or positive).
 	@Override
 	int compareTo(IRide other);
 }

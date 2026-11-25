@@ -1,8 +1,8 @@
+package interfaces;
+import datastructures.LinkedList;
 /**
  * Stores all rides in a structure maintained in alphabetical order by pickup location.
  */
-package interfaces;
-import datastructures.LinkedList;
 public interface IRideList {
 
     //Adds a ride and maintains alphabetical ordering by pickup location.

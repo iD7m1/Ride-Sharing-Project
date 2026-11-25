@@ -1,48 +1,38 @@
 package model.rides;
-import interfaces.IDateTime;
+
 import interfaces.IDriver;
 import interfaces.IPrivateRide;
 import interfaces.IRider;
-
+import interfaces.ITimeSlot;
 
 /**
  * Represents a private ride in the ride-sharing system.
  * <p>
  * A private ride is associated with exactly one rider
  * and one assigned driver.
- *
- * Inherits the ride ID, pickup and drop-off information,
- * scheduled times, and assigned driver from Ride. </p>
+ * </p>
  */
 public class PrivateRide extends Ride implements IPrivateRide {
-    private IRider rider;
+    private final IRider rider;
 
     /**
      * Constructs a private ride with the specified information.
      *
      * @param rideId          the ride's unique identifier
-     * @param pickupTime      the scheduled pickup time
-     * @param dropoffTime     the scheduled drop-off time
      * @param pickupLocation  the pickup location
      * @param dropoffLocation the drop-off location
-     * @param driver          the assigned driver
+     * @param timeSlot        the scheduled time slot
      * @param rider           the rider participating in this ride
+     * @param driver          the assigned driver
      * @throws IllegalArgumentException if the rider is null or the inherited ride information is invalid
      */
-    public PrivateRide (int rideId, IDateTime pickupTime, IDateTime dropoffTime, String pickupLocation, String dropoffLocation, IDriver driver, IRider rider) {
-        super(rideId, pickupTime, dropoffTime, pickupLocation, dropoffLocation, driver);
-        setRider(rider);
+    public PrivateRide(int rideId, String pickupLocation, String dropoffLocation, ITimeSlot timeSlot, IRider rider, IDriver driver) {
+        super(rideId, pickupLocation, dropoffLocation, timeSlot, driver);
+        if (rider == null)
+            throw new IllegalArgumentException("Rider cannot be null.");
+        this.rider = rider;
     }
 
-    /**
-     * Checks whether the specified rider participates in this ride.
-     *
-     * Since a private ride contains exactly one rider, the method
-     * compares the provided ID with the assigned rider's ID.
-     *
-     * @param riderId the ID of the rider to check
-     * @return true if the IDs match; false otherwise
-     */
     @Override
     public boolean hasRider(int riderId) {
         return rider.getId() == riderId;
@@ -51,12 +41,6 @@ public class PrivateRide extends Ride implements IPrivateRide {
     @Override
     public IRider getRider() {
         return rider;
-    }
-
-    @Override
-    public void setRider(IRider rider) {
-        if (rider == null) throw new IllegalArgumentException ("Rider cannot be null.");
-        this.rider = rider;
     }
 
     @Override

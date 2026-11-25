@@ -1,107 +1,103 @@
-
-/**
- * The interface of the Ride-Sharing System.
- */
 package interfaces;
 import datastructures.LinkedList;
+/**
+ * The Ride-Sharing System (Phase 2). It must store its data in the BST indexes
+ * listed in Section 2.3 of the assignment. Ride IDs are assigned 1, 2, 3, ...
+ * to rides as they are scheduled successfully; IDs are never reused.
+ * Methods returning a LinkedList return an empty list (never null) when there
+ * are no results.
+ */
 public interface IRideSharingSystem {
-	// Loads riders from a CSV file.
-	// Returns true if loading succeeds; false otherwise.
-	boolean loadRidersFromCSV(String ridersFilePath);
 
-	// Loads drivers from a CSV file.
-	// Returns true if loading succeeds; false otherwise.
-	boolean loadDriversFromCSV(String driversFilePath);
+	// Each load method skips lines that cannot be parsed or added, and returns
+	// the number of records added, or -1 if the file cannot be opened.
+	int loadRidersFromCSV(String ridersFilePath);
 
-	// Loads rides from a CSV file. All referenced riders and the assigned driver must already exist. It must enforce conflict rules
-	// Returns true if loading succeeds; false otherwise.
-	boolean loadRidesFromCSV(String ridesFilePath);
+	int loadDriversFromCSV(String driversFilePath);
 
-    //Adds a rider to the system after enforcing uniqueness by ID. Returns true if added; false if duplicate ID or invalid
-     boolean addRider(IRider rider);
+	// Schedules each line with schedulePrivateRide/scheduleSharedRide, in file order.
+	int loadRidesFromCSV(String ridesFilePath);
 
-    /**
-     * Adds a driver to the system after enforcing uniqueness by ID and by
-     * vehicle plate number (no two drivers may share the same plate).
-     * Returns true if added; false if duplicate ID, duplicate plate, or invalid
-     */
-     boolean addDriver(IDriver driver);
+	// ---------------------------------------------------------------- riders
 
-    //Searches for a rider by ID.
-    IRider searchRiderById(int riderId);
+	// Returns false if a rider with the same ID already exists.
+	boolean addRider(IRider rider);
 
-    //Searches for a rider by email.
-    IRider searchRiderByEmail(String email);
+	// Returns null if not found.
+	IRider searchRiderById(int riderId);
 
-    //Searches for all riders whose full name exactly matches the given name.
-    LinkedList<IRider> searchRidersByName(String fullName);
+	// Riders whose full name exactly matches, sorted by ID.
+	LinkedList<IRider> searchRidersByName(String fullName);
 
-    //Searches for all riders from the specified home city.
-    LinkedList<IRider> searchRidersByHomeCity(String homeCity);
+	// Riders from the home city, sorted by ID.
+	LinkedList<IRider> searchRidersByHomeCity(String homeCity);
 
-    //Returns all riders stored in the system.
-    LinkedList<IRider> getAllRiders();
+	// All riders, sorted by ID.
+	LinkedList<IRider> getAllRiders();
 
-    //Searches for a driver by ID.
-    IDriver searchDriverById(int driverId);
+	// Removes the rider: their private rides are deleted, they are removed from
+	// their shared rides, and shared rides left with no riders are deleted.
+	// Deleted rides are removed from every index and schedule.
+	boolean removeRider(int riderId);
 
-    //Searches for a driver by vehicle plate.
-    IDriver searchDriverByVehiclePlate(String vehiclePlate);
+	// --------------------------------------------------------------- drivers
 
-    //Searches for all drivers with the specified vehicle type.
-    LinkedList<IDriver> searchDriversByVehicleType(VehicleType vehicleType);
+	// Returns false if a driver with the same ID or vehicle plate already exists.
+	boolean addDriver(IDriver driver);
 
-    //Returns all drivers stored in the system.
-    LinkedList<IDriver> getAllDrivers();
+	// Returns null if not found.
+	IDriver searchDriverById(int driverId);
 
-    /**
-     * Removes a rider and performs cascade deletion of associated rides:
-     * - All private rides involving the rider are deleted.
-     * - The rider is removed from any shared rides.
-     * - Shared rides with no remaining participants are deleted.
-     * It returns true if the rider was found and removed; false otherwise
-     */
-    boolean removeRider(int riderId);
+	// Drivers of the vehicle type, sorted by ID.
+	LinkedList<IDriver> searchDriversByVehicleType(VehicleType vehicleType);
 
-    /**
-     * Removes a driver and performs cascade deletion of their assigned rides:
-     * - All private rides assigned to the driver are deleted.
-     * - All shared rides assigned to the driver are deleted.
-     * It returns true if the driver was found and removed; false otherwise
-     */
-    boolean removeDriver(int driverId);
+	// All drivers, sorted by ID.
+	LinkedList<IDriver> getAllDrivers();
 
-    /**
-     * Schedules a private ride for one rider with one driver.
-     * Requirements:
-     * - The rider must exist.
-     * - The driver must exist.
-     * - The ride must not conflict with the rider's current schedule.
-     * - The ride must not conflict with the driver's current schedule.
-     * It returns true if scheduled; false otherwise
-     */
-    boolean schedulePrivateRide(String pickupLocation, IDateTime pickupTime, IDateTime dropoffTime, String dropoffLocation, int riderId, int driverId);
+	// Removes the driver and deletes all their rides from every index and schedule.
+	boolean removeDriver(int driverId);
 
-    /**
-     * Schedules a shared ride for multiple riders with one driver.
-     * Requirements:
-     * - All riders must exist.
-     * - The driver must exist.
-     * - The ride must not conflict with any listed rider's schedule.
-     * - The ride must not conflict with the driver's current schedule.
-     * It returns true if scheduled; false otherwise
-     */
-    boolean scheduleSharedRide(String pickupLocation, IDateTime pickupTime, IDateTime dropoffTime, String dropoffLocation, int[] riderIds, int driverId);
+	// ----------------------------------------------------------------- rides
 
-    //Searches for all rides whose pickup location matches the given location (may return multiple if pickup locations repeat).
-    LinkedList<IRide> searchRidesByPickupLocation(String pickupLocation);
+	// The rider and driver must exist and the time slot must not conflict with
+	// either schedule (checked with getSchedule().findKey). Returns the new ride ID, or -1.
+	int schedulePrivateRide(String pickupLocation, String dropoffLocation, ITimeSlot timeSlot, int riderId, int driverId);
 
-    //Searches for all rides that involve a rider with the given name.
-    LinkedList<IRide> searchRidesByRiderName(String riderName);
+	// Same rules for every rider; riderIds must hold at least two IDs and no
+	// duplicates. If any check fails nothing changes. Returns the new ride ID, or -1.
+	int scheduleSharedRide(String pickupLocation, String dropoffLocation, ITimeSlot timeSlot, int[] riderIds, int driverId);
 
-    //Returns all riders registered on a shared ride identified by its pickup location.
-    LinkedList<IRider> getSharedRideParticipants(String pickupLocation);
+	// Deletes the ride from every index and from the schedules of its driver and riders.
+	// Returns false if there is no ride with this ID.
+	boolean cancelRide(int rideId);
 
-    //Returns all rides (private and shared) alphabetically ordered by pickup location.
-    LinkedList<IRide> getAllRidesAlphabetically();
+	// Rides from the pickup location, sorted by ride ID.
+	LinkedList<IRide> searchRidesByPickupLocation(String pickupLocation);
+
+	// Rides of any rider with this full name (found through the riders' schedules),
+	// each ride once, sorted by ride ID.
+	LinkedList<IRide> searchRidesByRiderName(String riderName);
+
+	// Participants of the shared ride with this ID, sorted by rider ID.
+	LinkedList<IRider> getSharedRideParticipants(int rideId);
+
+	// All rides, alphabetically by pickup location (ties by ride ID).
+	LinkedList<IRide> getAllRidesAlphabetically();
+
+	// Rides with from <= pickup date/time <= to, sorted by pickup date/time, then ride ID.
+	LinkedList<IRide> searchRidesByPickupTimeRange(IDateTime from, IDateTime to);
+
+	// Drivers of the vehicle type with no ride overlapping the time slot, sorted by ID.
+	LinkedList<IDriver> findAvailableDrivers(ITimeSlot timeSlot, VehicleType vehicleType);
+
+	// ------------------------------------------------------- tree statistics
+
+	// Number of nodes visited when the rider-ID index is searched for this ID (IBST.nbKeyComp).
+	int nbKeyCompRiderById(int riderId);
+
+	// size() of the given index; for a BST inside a BST, the number of keys of the outer BST.
+	int indexSize(IndexName index);
+
+	// height() of the given index; for a BST inside a BST, the height of the outer BST.
+	int indexHeight(IndexName index);
 }

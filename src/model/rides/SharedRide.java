@@ -1,129 +1,71 @@
 package model.rides;
+
+import datastructures.BST;
 import datastructures.LinkedList;
-import interfaces.IDateTime;
+import interfaces.IBST;
 import interfaces.IDriver;
 import interfaces.IRider;
 import interfaces.ISharedRide;
+import interfaces.ITimeSlot;
 
 /**
  * Represents a shared ride in the ride-sharing system.
  * <p>
- * A shared ride allows multiple riders to participate in
- * the same ride. Participants are stored in a linked
- * list, and each rider may appear only once based on their ID.
+ * Participants are stored in a BST keyed by rider ID.
  * </p>
- * Inherits the ride ID, scheduled times, pickup and drop-off
- * locations, and assigned driver from Ride.
  */
 public class SharedRide extends Ride implements ISharedRide {
-    private LinkedList<IRider> participants;
+    private final IBST<Integer, IRider> participants;
 
     /**
      * Constructs a shared ride with an initially empty
-     * participant list.
+     * participant BST.
      *
      * @param rideId          the ride's unique identifier
-     * @param pickupTime      the scheduled pickup time
-     * @param dropoffTime     the scheduled drop-off time
      * @param pickupLocation  the pickup location
      * @param dropoffLocation the drop-off location
+     * @param timeSlot        the scheduled time slot
      * @param driver          the assigned driver
-     * @throws IllegalArgumentException if the inherited ride
-     *                                  information is invalid
+     * @throws IllegalArgumentException if the inherited ride information is invalid
      */
-    public SharedRide (int rideId, IDateTime pickupTime, IDateTime dropoffTime, String pickupLocation, String dropoffLocation, IDriver driver) {
-        super(rideId, pickupTime, dropoffTime, pickupLocation, dropoffLocation, driver);
-        participants = new LinkedList<IRider>();
+    public SharedRide(int rideId, String pickupLocation, String dropoffLocation, ITimeSlot timeSlot, IDriver driver) {
+        super(rideId, pickupLocation, dropoffLocation, timeSlot, driver);
+        this.participants = new BST<Integer, IRider>();
     }
 
-    /**
-     * Checks whether a rider participates in this shared ride.
-     *
-     * Searches the participant list by rider ID.
-     *
-     * @param riderId the ID of the rider to search for
-     * @return true if the rider participates; false otherwise
-     */
     @Override
     public boolean hasRider(int riderId) {
-        if (participants.empty()) return false;
-
-        participants.findFirst();
-
-        while (true) {
-            if (participants.retrieve().getId() == riderId) return true;
-            if (participants.last()) break;
-            participants.findNext();
-        }
-
-        return false;
+        // TODO: check if riderId exists in participants BST
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public LinkedList<IRider> getParticipants() {
-        return participants;
+        // TODO: return participants sorted by rider ID via participants.inOrder()
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
-    /**
-     * Adds a rider to this shared ride.
-     *
-     * A rider cannot be null or already present in the
-     * participant list. Uniqueness is determined by rider ID.
-     *
-     * @param rider the rider to add
-     * @return true if the rider was added successfully; false if the rider is null or already participates
-     */
     @Override
-    public boolean addParticipant (IRider rider) {
-        if (rider == null || hasRider(rider.getId())) return false;
-        participants.insert(rider);
-        return true;
+    public boolean addParticipant(IRider rider) {
+        // TODO: add rider to participants BST in O(h)
+        throw new UnsupportedOperationException("Not implemented yet");
     }
-    /**
-     * Removes a participant from this shared ride by ID.
-     *
-     * @param riderId the ID of the rider to remove
-     * @return true if the rider was found and removed; false if the rider does not participate
-     */
+
     @Override
     public boolean removeParticipantById(int riderId) {
-        if (participants.empty()) return false;
-
-        participants.findFirst();
-
-        while (true) {
-            if (participants.retrieve().getId() == riderId) {
-                participants.remove();
-                return true;
-            }
-            if (participants.last()) break;
-            participants.findNext();
-        }
-
-        return false;
+        // TODO: remove rider from participants BST in O(h)
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public boolean isEmpty() {
-        return participants.empty();
+        // TODO: return whether participants BST is empty
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public String toString() {
-        if (participants.empty()) return String.format("%s, Riders: None", super.toString());
-
-        StringBuilder riders = new StringBuilder("Riders: ");
-        participants.findFirst();
-
-        while (true) {
-            riders.append(String.format("%s (ID: %d)", participants.retrieve().getName(), participants.retrieve().getId()));
-
-            if (participants.last()) break;
-
-            riders.append(" | ");
-            participants.findNext();
-        }
-
-        return String.format("Shared, %s, %s", super.toString(), riders);
+        // TODO: format shared ride with its participants
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

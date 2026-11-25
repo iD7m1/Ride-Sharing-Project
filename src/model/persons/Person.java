@@ -1,7 +1,10 @@
 package model.persons;
-import datastructures.LinkedList;
+
+import datastructures.BST;
+import interfaces.IBST;
 import interfaces.IPerson;
 import interfaces.IRide;
+import interfaces.ITimeSlot;
 
 /**
  * Represents the common attributes and behavior of a person
@@ -9,40 +12,31 @@ import interfaces.IRide;
  *
  * <p>This abstract class serves as the base class for Rider
  * and Driver. Each person has a unique identifier, a name,
- * a phone number, and a history of associated rides.</p>
+ * a phone number, and a schedule of associated rides stored in a BST.</p>
  *
- * <p>The identifier cannot be changed after construction.
+ * <p>The identifier and name cannot be changed after construction.
  * Phone numbers must contain exactly 10 numeric digits.</p>
- *
- * ID uniqueness is enforced by DriverList, RiderList and
- * RideSharingSystem when records are added.
  */
-
 public abstract class Person implements IPerson {
 
     private final int id;
-    private String name;
+    private final String name;
     private String phoneNumber;
-    private LinkedList<IRide> rideHistory;
+    private final IBST<ITimeSlot, IRide> schedule;
 
     /**
-     * a person with the specified information.
+     * Constructs a person with the specified information.
      *
      * @param id          the person's identifier
      * @param name        the person's name
      * @param phoneNumber the person's 10-digit phone number
      * @throws IllegalArgumentException if the phone number is invalid
      */
-    public Person (int id, String name, String phoneNumber) throws IllegalArgumentException {
+    public Person(int id, String name, String phoneNumber) throws IllegalArgumentException {
         this.id = id;
-        setName(name);
-        setPhoneNumber(phoneNumber);
-        rideHistory = new LinkedList<IRide>();
-    }
-
-    @Override
-    public void setName(String name) {
         this.name = name;
+        setPhoneNumber(phoneNumber);
+        this.schedule = new BST<ITimeSlot, IRide>();
     }
 
     /**
@@ -53,10 +47,9 @@ public abstract class Person implements IPerson {
      *
      * @param phoneNumber the new phone number
      * @throws IllegalArgumentException if the value is null or does not contain exactly 10 digits
-     *
      */
     @Override
-    public void setPhoneNumber (String phoneNumber) throws IllegalArgumentException {
+    public void setPhoneNumber(String phoneNumber) throws IllegalArgumentException {
         if (phoneNumber == null || !phoneNumber.matches("\\d{10}")) {
             throw new IllegalArgumentException("Phone number must contain exactly 10 digits.");
         }
@@ -79,8 +72,8 @@ public abstract class Person implements IPerson {
     }
 
     @Override
-    public LinkedList<IRide> getRideHistory() {
-        return rideHistory;
+    public IBST<ITimeSlot, IRide> getSchedule() {
+        return schedule;
     }
 
     @Override
