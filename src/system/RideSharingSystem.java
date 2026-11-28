@@ -354,28 +354,90 @@ public class RideSharingSystem implements IRideSharingSystem {
 
     // ----------------------------------------------------------------- drivers
 
+    /**
+     * Adds a driver to the three driver indexes.
+     * <p>
+     * Uniqueness of the ID and of the vehicle plate is checked before
+     * anything is inserted, so a rejected driver is never left behind
+     * in some of the indexes.
+     * </p>
+     *
+     * @param driver the driver to add
+     * @return true if the driver was added; false if the driver is invalid,
+     *         or a driver with the same ID or vehicle plate already exists
+     */
     @Override
     public boolean addDriver(IDriver driver) {
-        // TODO: check uniqueness by ID and vehicle plate, insert into all driver indexes
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (driver == null)
+            return false;
+
+        int id = driver.getId();
+        String plate = driver.getVehiclePlate();
+        VehicleType vehicleType = driver.getVehicleType();
+
+        // The plate and the vehicle type are BST keys, so they cannot be missing
+        if (plate == null || vehicleType == null)
+            return false;
+
+        // Check uniqueness first: nothing is inserted if the driver is rejected
+        if (driversById.findKey(id) || driversByPlate.findKey(plate))
+            return false;
+
+        // Unique-key indexes: each key maps directly to the driver
+        driversById.insert(id, driver);
+        driversByPlate.insert(plate, driver);
+
+        // Non-unique-key index: each vehicle type maps to an inner BST
+        // holding all the drivers of that type, keyed by driver ID
+        if (driversByVehicleType.findKey(vehicleType)) {
+            driversByVehicleType.retrieve().insert(id, driver);
+        } else {
+            IBST<Integer, IDriver> sameTypeDrivers = new BST<Integer, IDriver>();
+            sameTypeDrivers.insert(id, driver);
+            driversByVehicleType.insert(vehicleType, sameTypeDrivers);
+        }
+        return true;
     }
 
+    /**
+     * Searches the driver-ID index for a driver.
+     *
+     * @param driverId the ID of the driver to search for
+     * @return the driver with this ID, or null if not found
+     */
     @Override
     public IDriver searchDriverById(int driverId) {
-        // TODO: search driversById
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (driversById.findKey(driverId))
+            return driversById.retrieve();
+        return null;
     }
 
+    /**
+     * Returns the drivers of a vehicle type, sorted by ID.
+     * <p>
+     * The inner BST of the vehicle type is keyed by driver ID, so its
+     * in-order traversal is already sorted and no sorting is needed.
+     * </p>
+     *
+     * @param vehicleType the vehicle type to search for
+     * @return a list of the matching drivers, or an empty list if there are none
+     */
     @Override
     public LinkedList<IDriver> searchDriversByVehicleType(VehicleType vehicleType) {
-        // TODO: search driversByVehicleType and return inner BST inOrder() (empty list if not found)
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (vehicleType != null && driversByVehicleType.findKey(vehicleType))
+            return driversByVehicleType.retrieve().inOrder();
+        return new LinkedList<IDriver>();
     }
 
+    /**
+     * Returns all drivers, sorted by ID, using an in-order traversal
+     * of the driver-ID index.
+     *
+     * @return a list of all drivers, or an empty list if there are none
+     */
     @Override
     public LinkedList<IDriver> getAllDrivers() {
-        // TODO: return driversById.inOrder()
-        throw new UnsupportedOperationException("Not implemented yet");
+        return driversById.inOrder();
     }
 
     @Override
@@ -434,10 +496,40 @@ public class RideSharingSystem implements IRideSharingSystem {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
+    /**
+     * Returns the drivers of a vehicle type that have no ride overlapping
+     * the time slot, sorted by ID.
+     * <p>
+     * Two time slots compare as equal when they overlap, so a single
+     * search of a driver's schedule tells whether the driver is busy.
+     * </p>
+     *
+     * @param timeSlot    the time slot the drivers must be free in
+     * @param vehicleType the vehicle type of the drivers
+     * @return a list of the available drivers, or an empty list if there are none
+     */
     @Override
     public LinkedList<IDriver> findAvailableDrivers(ITimeSlot timeSlot, VehicleType vehicleType) {
-        // TODO: get drivers of vehicleType and filter those with !driver.getSchedule().findKey(timeSlot)
-        throw new UnsupportedOperationException("Not implemented yet");
+        LinkedList<IDriver> available = new LinkedList<IDriver>();
+        if (timeSlot == null)
+            return available;
+
+        // Drivers of the requested type, already sorted by ID
+        LinkedList<IDriver> candidates = searchDriversByVehicleType(vehicleType);
+        if (candidates.empty())
+            return available;
+
+        candidates.findFirst();
+        while (true) {
+            IDriver driver = candidates.retrieve();
+            // findKey returns true only if a ride of the schedule overlaps the slot
+            if (!driver.getSchedule().findKey(timeSlot))
+                available.insert(driver);
+            if (candidates.last())
+                break;
+            candidates.findNext();
+        }
+        return available;
     }
 
     // --------------------------------------------------------- tree statistics

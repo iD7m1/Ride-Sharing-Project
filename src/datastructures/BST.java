@@ -23,8 +23,8 @@ public class BST<K extends Comparable<K>, T> implements IBST<K, T> {
 
     @Override
     public int size() {
-        // TODO: return number of keys in O(1) (update size in insert/removeKey)
-        throw new UnsupportedOperationException("Not implemented yet");
+        // size is updated by insert and removeKey, so the tree is not traversed
+        return size;
     }
 
     @Override
@@ -134,27 +134,101 @@ public class BST<K extends Comparable<K>, T> implements IBST<K, T> {
         }
     }
 
+    // Returns the data of all nodes in increasing order of key.
+    // Every node is visited exactly once: O(n)
     @Override
     public LinkedList<T> inOrder() {
-        // TODO: return all node data in increasing order of key in O(n)
-        throw new UnsupportedOperationException("Not implemented yet");
+        LinkedList<T> result = new LinkedList<T>();
+        inOrder(root, result);
+        return result;
     }
 
+    // In-order traversal of the subtree rooted at node:
+    // left subtree, then the node itself, then right subtree
+    private void inOrder(BSTNode<K, T> node, LinkedList<T> result) {
+        if (node == null)
+            return;
+        inOrder(node.left, result);
+        // insert() adds after the list's current element, which is always
+        // the last one here, so the data is appended in O(1)
+        result.insert(node.data);
+        inOrder(node.right, result);
+    }
+
+    // Returns, in increasing order of key, the data of every node with
+    // low <= key <= high. Only the subtrees that can contain such keys
+    // are visited: O(h + k), where k is the number of nodes returned
     @Override
     public LinkedList<T> rangeSearch(K low, K high) {
-        // TODO: return all node data with low <= key <= high in O(h + k)
-        throw new UnsupportedOperationException("Not implemented yet");
+        LinkedList<T> result = new LinkedList<T>();
+        // No key can be inside a missing or an empty range
+        if (low == null || high == null || low.compareTo(high) > 0)
+            return result;
+        rangeSearch(root, low, high, result);
+        return result;
     }
 
+    // In-order traversal that skips the subtrees outside [low, high]
+    private void rangeSearch(BSTNode<K, T> node, K low, K high, LinkedList<T> result) {
+        if (node == null)
+            return;
+        int cmpLow = low.compareTo(node.key);   // negative when low < key
+        int cmpHigh = high.compareTo(node.key); // positive when key < high
+
+        // The left subtree holds the keys smaller than this key:
+        // it can contain keys of the range only if low < key
+        if (cmpLow < 0)
+            rangeSearch(node.left, low, high, result);
+
+        // low <= key <= high
+        if (cmpLow <= 0 && cmpHigh >= 0)
+            result.insert(node.data);
+
+        // The right subtree holds the keys greater than this key:
+        // it can contain keys of the range only if key < high
+        if (cmpHigh > 0)
+            rangeSearch(node.right, low, high, result);
+    }
+
+    // Returns the number of nodes on the longest root-to-leaf path (0 if empty)
     @Override
     public int height() {
-        // TODO: return number of nodes on longest root-to-leaf path (0 if empty)
-        throw new UnsupportedOperationException("Not implemented yet");
+        return height(root);
     }
 
+    // Height of the subtree rooted at node: the node itself
+    // plus the taller of its two subtrees
+    private int height(BSTNode<K, T> node) {
+        if (node == null)
+            return 0;
+        int leftHeight = height(node.left);
+        int rightHeight = height(node.right);
+        if (leftHeight > rightHeight)
+            return leftHeight + 1;
+        else
+            return rightHeight + 1;
+    }
+
+    // Returns the number of nodes visited by a search for the key
+    // (one comparison per node, 0 if empty). O(h)
     @Override
     public int nbKeyComp(K key) {
-        // TODO: return number of nodes visited searching for key without modifying tree or current
-        throw new UnsupportedOperationException("Not implemented yet");
+        int count = 0;
+        if (key == null)
+            return count;
+        // A local pointer follows the same path as findKey,
+        // so the tree and current are left unchanged
+        BSTNode<K, T> p = root;
+        while (p != null) {
+            count++; // one comparison for the node being visited
+            int cmp = key.compareTo(p.key);
+            if (cmp == 0)
+                return count; // key found: the search stops here
+            else if (cmp < 0)
+                p = p.left;
+            else
+                p = p.right;
+        }
+        return count; // key not found: the search fell off the tree
     }
 }
