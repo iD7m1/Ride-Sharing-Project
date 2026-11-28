@@ -28,44 +28,62 @@ public class SharedRide extends Ride implements ISharedRide {
      * @param driver          the assigned driver
      * @throws IllegalArgumentException if the inherited ride information is invalid
      */
-    public SharedRide(int rideId, String pickupLocation, String dropoffLocation, ITimeSlot timeSlot, IDriver driver) {
+    public SharedRide (int rideId, String pickupLocation, String dropoffLocation, ITimeSlot timeSlot, IDriver driver) {
         super(rideId, pickupLocation, dropoffLocation, timeSlot, driver);
         this.participants = new BST<Integer, IRider>();
     }
 
     @Override
     public boolean hasRider(int riderId) {
-        // TODO: check if riderId exists in participants BST
-        throw new UnsupportedOperationException("Not implemented yet");
+        return participants.findKey(riderId);
     }
 
     @Override
     public LinkedList<IRider> getParticipants() {
-        // TODO: return participants sorted by rider ID via participants.inOrder()
-        throw new UnsupportedOperationException("Not implemented yet");
+        return participants.inOrder();
     }
 
     @Override
     public boolean addParticipant(IRider rider) {
-        // TODO: add rider to participants BST in O(h)
-        throw new UnsupportedOperationException("Not implemented yet");
+        return participants.insert(rider.getId(), rider);
     }
 
     @Override
-    public boolean removeParticipantById(int riderId) {
-        // TODO: remove rider from participants BST in O(h)
-        throw new UnsupportedOperationException("Not implemented yet");
+    public boolean removeParticipantById (int riderId) {
+        return participants.removeKey(riderId);
     }
 
     @Override
-    public boolean isEmpty() {
-        // TODO: return whether participants BST is empty
-        throw new UnsupportedOperationException("Not implemented yet");
+    public boolean isEmpty () {
+        return participants.empty();
     }
 
     @Override
-    public String toString() {
-        // TODO: format shared ride with its participants
-        throw new UnsupportedOperationException("Not implemented yet");
+    public String toString () {
+        StringBuilder sb = new StringBuilder(super.toString());
+
+        LinkedList<IRider> list = getParticipants();
+
+        if (list.empty()) {
+            sb.append("\nRiders: None");
+            return sb.toString();
+        }
+
+        sb.append("\nRiders:");
+
+        list.findFirst();
+
+        while (true) {
+            IRider rider = list.retrieve();
+
+            sb.append("\nID: ").append(rider.getId()).append(", Name: ").append(rider.getName());
+
+            if (list.last())
+                break;
+
+            list.findNext();
+        }
+
+        return sb.toString();
     }
 }

@@ -42,7 +42,7 @@ public class RideSharingSystem implements IRideSharingSystem {
      * Constructs an empty ride-sharing system with all nine BST indexes
      * and sets the initial ride ID to 1.
      */
-    public RideSharingSystem() {
+    public RideSharingSystem () {
         this.ridersById = new BST<Integer, IRider>();
         this.ridersByName = new BST<String, IBST<Integer, IRider>>();
         this.ridersByHomeCity = new BST<String, IBST<Integer, IRider>>();
@@ -69,8 +69,7 @@ public class RideSharingSystem implements IRideSharingSystem {
      * @param innerKey   the unique object ID in the inner BST
      * @param value      the object to store
      */
-    private <K extends Comparable<K>, V> void insertIntoNestedIndex(
-            IBST<K, IBST<Integer, V>> outerIndex, K outerKey, int innerKey, V value) {
+    private <K extends Comparable<K>, V> void insertIntoNestedIndex (IBST<K, IBST<Integer, V>> outerIndex, K outerKey, int innerKey, V value) {
         if (outerIndex.findKey(outerKey)) {
             outerIndex.retrieve().insert(innerKey, value);
         } else {
@@ -88,8 +87,7 @@ public class RideSharingSystem implements IRideSharingSystem {
      * @param outerKey   the non-unique key in the outer BST
      * @param innerKey   the unique object ID in the inner BST
      */
-    private <K extends Comparable<K>, V> void removeFromNestedIndex(
-            IBST<K, IBST<Integer, V>> outerIndex, K outerKey, int innerKey) {
+    private <K extends Comparable<K>, V> void removeFromNestedIndex(IBST<K, IBST<Integer, V>> outerIndex, K outerKey, int innerKey) {
         if (outerIndex.findKey(outerKey)) {
             IBST<Integer, V> inner = outerIndex.retrieve();
             inner.removeKey(innerKey);
@@ -129,7 +127,7 @@ public class RideSharingSystem implements IRideSharingSystem {
      * @return an IDateTime object representing the specified date and time
      * @throws IllegalArgumentException if the date-time format or value is invalid
      */
-    private IDateTime parseDateTime(String dateTimeStr) {
+    private IDateTime parseDateTime (String dateTimeStr) {
         if (dateTimeStr == null) {
             throw new IllegalArgumentException("Date/time string cannot be null.");
         }
@@ -155,7 +153,7 @@ public class RideSharingSystem implements IRideSharingSystem {
     // ------------------------------------------------------------- CSV loading
 
     @Override
-    public int loadRidersFromCSV(String ridersFilePath) {
+    public int loadRidersFromCSV (String ridersFilePath) {
         if (ridersFilePath == null) return -1;
         int added = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(ridersFilePath))) {
@@ -189,7 +187,7 @@ public class RideSharingSystem implements IRideSharingSystem {
     }
 
     @Override
-    public int loadDriversFromCSV(String driversFilePath) {
+    public int loadDriversFromCSV (String driversFilePath) {
         if (driversFilePath == null) return -1;
         int added = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(driversFilePath))) {
@@ -223,7 +221,7 @@ public class RideSharingSystem implements IRideSharingSystem {
     }
 
     @Override
-    public int loadRidesFromCSV(String ridesFilePath) {
+    public int loadRidesFromCSV (String ridesFilePath) {
         if (ridesFilePath == null) return -1;
         int added = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(ridesFilePath))) {
@@ -273,7 +271,7 @@ public class RideSharingSystem implements IRideSharingSystem {
     // ------------------------------------------------------------------ riders
 
     @Override
-    public boolean addRider(IRider rider) {
+    public boolean addRider (IRider rider) {
         if (rider == null || rider.getName() == null || rider.getHomeCity() == null) {
             return false;
         }
@@ -289,7 +287,7 @@ public class RideSharingSystem implements IRideSharingSystem {
     }
 
     @Override
-    public IRider searchRiderById(int riderId) {
+    public IRider searchRiderById (int riderId) {
         if (ridersById.findKey(riderId)) {
             return ridersById.retrieve();
         }
@@ -297,7 +295,7 @@ public class RideSharingSystem implements IRideSharingSystem {
     }
 
     @Override
-    public LinkedList<IRider> searchRidersByName(String fullName) {
+    public LinkedList<IRider> searchRidersByName (String fullName) {
         if (fullName == null || !ridersByName.findKey(fullName)) {
             return new LinkedList<IRider>();
         }
@@ -305,7 +303,7 @@ public class RideSharingSystem implements IRideSharingSystem {
     }
 
     @Override
-    public LinkedList<IRider> searchRidersByHomeCity(String homeCity) {
+    public LinkedList<IRider> searchRidersByHomeCity (String homeCity) {
         if (homeCity == null || !ridersByHomeCity.findKey(homeCity)) {
             return new LinkedList<IRider>();
         }
@@ -313,12 +311,12 @@ public class RideSharingSystem implements IRideSharingSystem {
     }
 
     @Override
-    public LinkedList<IRider> getAllRiders() {
+    public LinkedList<IRider> getAllRiders () {
         return ridersById.inOrder();
     }
 
     @Override
-    public boolean removeRider(int riderId) {
+    public boolean removeRider (int riderId) {
         if (!ridersById.findKey(riderId)) {
             return false;
         }
@@ -367,7 +365,7 @@ public class RideSharingSystem implements IRideSharingSystem {
      *         or a driver with the same ID or vehicle plate already exists
      */
     @Override
-    public boolean addDriver(IDriver driver) {
+    public boolean addDriver (IDriver driver) {
         if (driver == null)
             return false;
 
@@ -406,7 +404,7 @@ public class RideSharingSystem implements IRideSharingSystem {
      * @return the driver with this ID, or null if not found
      */
     @Override
-    public IDriver searchDriverById(int driverId) {
+    public IDriver searchDriverById (int driverId) {
         if (driversById.findKey(driverId))
             return driversById.retrieve();
         return null;
@@ -423,7 +421,7 @@ public class RideSharingSystem implements IRideSharingSystem {
      * @return a list of the matching drivers, or an empty list if there are none
      */
     @Override
-    public LinkedList<IDriver> searchDriversByVehicleType(VehicleType vehicleType) {
+    public LinkedList<IDriver> searchDriversByVehicleType (VehicleType vehicleType) {
         if (vehicleType != null && driversByVehicleType.findKey(vehicleType))
             return driversByVehicleType.retrieve().inOrder();
         return new LinkedList<IDriver>();
@@ -436,12 +434,12 @@ public class RideSharingSystem implements IRideSharingSystem {
      * @return a list of all drivers, or an empty list if there are none
      */
     @Override
-    public LinkedList<IDriver> getAllDrivers() {
+    public LinkedList<IDriver> getAllDrivers () {
         return driversById.inOrder();
     }
 
     @Override
-    public boolean removeDriver(int driverId) {
+    public boolean removeDriver (int driverId) {
         // TODO: delete all driver's rides from every index & schedule, then remove from all driver indexes
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -449,49 +447,49 @@ public class RideSharingSystem implements IRideSharingSystem {
     // ------------------------------------------------------------------- rides
 
     @Override
-    public int schedulePrivateRide(String pickupLocation, String dropoffLocation, ITimeSlot timeSlot, int riderId, int driverId) {
+    public int schedulePrivateRide (String pickupLocation, String dropoffLocation, ITimeSlot timeSlot, int riderId, int driverId) {
         // TODO: validate rider/driver existence and schedule conflicts via getSchedule().findKey(timeSlot); return new ride ID or -1
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public int scheduleSharedRide(String pickupLocation, String dropoffLocation, ITimeSlot timeSlot, int[] riderIds, int driverId) {
+    public int scheduleSharedRide (String pickupLocation, String dropoffLocation, ITimeSlot timeSlot, int[] riderIds, int driverId) {
         // TODO: validate >= 2 unique riders, existence, and schedule conflicts; return new ride ID or -1
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public boolean cancelRide(int rideId) {
+    public boolean cancelRide (int rideId) {
         // TODO: delete ride from all ride indexes and from driver/rider schedules
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public LinkedList<IRide> searchRidesByPickupLocation(String pickupLocation) {
+    public LinkedList<IRide> searchRidesByPickupLocation (String pickupLocation) {
         // TODO: search ridesByPickupLocation and return inner BST inOrder()
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public LinkedList<IRide> searchRidesByRiderName(String riderName) {
+    public LinkedList<IRide> searchRidesByRiderName (String riderName) {
         // TODO: find riders by name, collect rides from schedules (deduplicated & sorted by ride ID)
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public LinkedList<IRider> getSharedRideParticipants(int rideId) {
+    public LinkedList<IRider> getSharedRideParticipants (int rideId) {
         // TODO: look up ride in ridesById; if ISharedRide return getParticipants(), else empty list
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public LinkedList<IRide> getAllRidesAlphabetically() {
+    public LinkedList<IRide> getAllRidesAlphabetically () {
         // TODO: traverse ridesByPickupLocation in-order and collect inner BSTs in-order in O(n)
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public LinkedList<IRide> searchRidesByPickupTimeRange(IDateTime from, IDateTime to) {
+    public LinkedList<IRide> searchRidesByPickupTimeRange (IDateTime from, IDateTime to) {
         // TODO: use ridesByPickupTime.rangeSearch(from, to) and collect inner BSTs in-order
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -509,7 +507,7 @@ public class RideSharingSystem implements IRideSharingSystem {
      * @return a list of the available drivers, or an empty list if there are none
      */
     @Override
-    public LinkedList<IDriver> findAvailableDrivers(ITimeSlot timeSlot, VehicleType vehicleType) {
+    public LinkedList<IDriver> findAvailableDrivers (ITimeSlot timeSlot, VehicleType vehicleType) {
         LinkedList<IDriver> available = new LinkedList<IDriver>();
         if (timeSlot == null)
             return available;
@@ -535,17 +533,17 @@ public class RideSharingSystem implements IRideSharingSystem {
     // --------------------------------------------------------- tree statistics
 
     @Override
-    public int nbKeyCompRiderById(int riderId) {
+    public int nbKeyCompRiderById (int riderId) {
         return ridersById.nbKeyComp(riderId);
     }
 
     @Override
-    public int indexSize(IndexName index) {
+    public int indexSize (IndexName index) {
         return getIndex(index).size();
     }
 
     @Override
-    public int indexHeight(IndexName index) {
+    public int indexHeight (IndexName index) {
         return getIndex(index).height();
     }
 }
